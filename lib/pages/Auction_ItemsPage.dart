@@ -1,0 +1,134 @@
+import 'package:flutter/material.dart';
+import 'package:fe/models/Auction_Items.dart';
+import 'package:fe/services/ApiAuction_ItemsService.dart';
+import 'package:fe/models/Category.dart';
+import 'package:fe/pages/Auction_ItemsDetailPage.dart'; // Import the detail page
+
+class Auction_ItemsPage extends StatefulWidget {
+  final Category category;
+
+  const Auction_ItemsPage({super.key, required this.category});
+
+  @override
+  State<StatefulWidget> createState() => _Auction_ItemsPageState();
+}
+
+class _Auction_ItemsPageState extends State<Auction_ItemsPage> {
+  final ApiAuction_ItemsService apiService = ApiAuction_ItemsService();
+  late Future<List<AuctionItems>> futureAuctionItems;
+
+  @override
+  void initState() {
+    super.initState();
+    futureAuctionItems = apiService.getAllAuctionItems();
+  }
+
+  Widget buildAuctionItemCard(AuctionItems item) {
+    String imageUrl = item.images?.isNotEmpty ?? false ? item.images!.first : 'https://via.placeholder.com/150';
+
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => Auction_ItemsDetailPage(item: item),
+          ),
+        );
+      },
+      child: Card(
+        elevation: 3,
+        margin: const EdgeInsets.all(8),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Image.network(
+              imageUrl,
+              width: double.infinity,
+              height: 150,  // Adjust height to fit in the grid
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) {
+                return Image.network('https://via.placeholder.com/150', width: double.infinity, height: 150, fit: BoxFit.cover);
+              },
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text(
+                item.itemName ?? 'No Name',
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              child: Text('Price: \$${item.startingPrice ?? 0}'),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              child: Text('End Date: ${item.endDate ?? 'No End Date'}'),
+            ),
+            const SizedBox(height: 8),
+          ],
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Items in ${widget.category.category_name}'),
+        backgroundColor: Colors.greenAccent,
+      ),
+      body: FutureBuilder<List<AuctionItems>>(
+        future: futureAuctionItems,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: const [
+                  CircularProgressIndicator(),
+                  SizedBox(height: 10),
+                  Text('Loading auction items...'),
+                ],
+              ),
+            );
+          } else if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return const Center(child: Text('No items found.'));
+          }
+
+          List<AuctionItems> auctionItems = snapshot.data!;
+          List<AuctionItems> filteredItems = auctionItems
+              .where((item) => item.categoryId == widget.category.category_id)
+              .toList();
+
+          return RefreshIndicator(
+            onRefresh: () async {
+              setState(() {
+                futureAuctionItems = apiService.getAllAuctionItems();
+              });
+            },
+            child: GridView.builder(
+              padding: const EdgeInsets.all(8),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,  // This makes two items per row
+                crossAxisSpacing: 8,  // Space between columns
+                mainAxisSpacing: 8,   // Space between rows
+                childAspectRatio: 0.7,  // Adjust to get proper size for each item
+              ),
+              itemCount: filteredItems.length,
+              itemBuilder: (context, index) {
+                return buildAuctionItemCard(filteredItems[index]);
+              },
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
