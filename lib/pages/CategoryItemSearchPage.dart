@@ -68,10 +68,12 @@ class _CategoryItemSearchPageState extends State<CategoryItemSearchPage> {
   Future<void> _saveRecentSearch(String query) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     if (!_recentSearches.contains(query)) {
-      _recentSearches.insert(0, query);
-      if (_recentSearches.length > 5) {
-        _recentSearches.removeLast();
-      }
+      setState(() {
+        _recentSearches.insert(0, query);
+        if (_recentSearches.length > 5) {
+          _recentSearches.removeLast();
+        }
+      });
       await prefs.setStringList('recent_searches', _recentSearches);
     }
   }
@@ -101,18 +103,8 @@ class _CategoryItemSearchPageState extends State<CategoryItemSearchPage> {
 
   void _updateSuggestions(String query) {
     setState(() {
-      if (query.isEmpty) {
-        _showRecentSearches = true;
-        _showSuggestions = false;
-        _filteredItems.clear();
-      } else {
-        _filteredItems = _allItems
-            .where((item) => item.itemName != null &&
-            item.itemName!.toLowerCase().contains(query.toLowerCase()))
-            .toList();
-        _showRecentSearches = false;
-        _showSuggestions = true;
-      }
+      _showRecentSearches = query.isEmpty;
+      _showSuggestions = false;  // Disable instant search
     });
   }
 
@@ -149,11 +141,15 @@ class _CategoryItemSearchPageState extends State<CategoryItemSearchPage> {
                       decoration: const InputDecoration(
                         hintText: 'Search items...',
                         border: InputBorder.none,
-                        isDense: true, // Makes the search field more compact
+                        isDense: true,
                       ),
-                      onChanged: _updateSuggestions,
                       onTap: () => setState(() => _showRecentSearches = _searchController.text.isEmpty),
+                      onSubmitted: (_) => _performSearch(),  // Now triggers search when Enter is pressed
                     ),
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.search, color: Colors.grey), // Add a search button
+                    onPressed: _performSearch,
                   ),
                   IconButton(
                     icon: Icon(Icons.close, color: Colors.grey), // Clear button on the right
@@ -201,6 +197,12 @@ class _CategoryItemSearchPageState extends State<CategoryItemSearchPage> {
               itemCount: _filteredItems.length,
               itemBuilder: (context, index) {
                 final item = _filteredItems[index];
+
+                // Get all items from the same category as the selected item
+                List<AuctionItems> relatedItems = _allItems
+                    .where((auctionItem) => auctionItem.category?.category_id == item.category?.category_id)
+                    .toList();
+
                 return ListTile(
                   leading: Image.network(
                     item.images?.isNotEmpty ?? false
@@ -216,7 +218,10 @@ class _CategoryItemSearchPageState extends State<CategoryItemSearchPage> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => Auction_ItemsDetailPage(item: item),
+                        builder: (context) => Auction_ItemsDetailPage(
+                          item: item,
+                          allItems: relatedItems, // Pass related items instead of filtered search results
+                        ),
                       ),
                     );
                   },

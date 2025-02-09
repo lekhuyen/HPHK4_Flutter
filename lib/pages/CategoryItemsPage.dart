@@ -25,12 +25,13 @@ class _CategoryItemPageState extends State<CategoryItemPage> {
     super.initState();
     futureCategories = apiService.getAllCategory();
     futureAuctionItems = auctionService.getAllAuctionItems();
+
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,  // Set background color of the whole page to white
+      backgroundColor: Colors.white,
       appBar: AppBar(
         title: const Text('Categories'),
         backgroundColor: Colors.white,
@@ -73,35 +74,35 @@ class _CategoryItemPageState extends State<CategoryItemPage> {
       ),
       body: Column(
         children: [
-          // Line under search bar
-          const Divider(thickness: 1.0, color: Colors.grey),  // This adds a line under the search bar
+          const Divider(thickness: 1.0, color: Colors.grey),
           Expanded(
             child: FutureBuilder<List<Category>>(
               future: futureCategories,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
+              builder: (context, categorySnapshot) {
+                if (categorySnapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
-                } else if (snapshot.hasError) {
-                  return Center(child: Text('Error: ${snapshot.error}'));
-                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                } else if (categorySnapshot.hasError) {
+                  return Center(child: Text('Error: ${categorySnapshot.error}'));
+                } else if (!categorySnapshot.hasData || categorySnapshot.data!.isEmpty) {
                   return const Center(child: Text('No categories found.'));
                 }
 
-                List<Category> categories = snapshot.data!;
+                return FutureBuilder<List<AuctionItems>>(
+                  future: futureAuctionItems,
+                  builder: (context, auctionSnapshot) {
+                    if (auctionSnapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    } else if (auctionSnapshot.hasError) {
+                      return Center(child: Text('Error: ${auctionSnapshot.error}'));
+                    }
 
-                return ListView.builder(
-                  itemCount: categories.length,
-                  itemBuilder: (context, index) {
-                    return FutureBuilder<List<AuctionItems>>(
-                      future: futureAuctionItems,
-                      builder: (context, itemSnapshot) {
-                        if (itemSnapshot.connectionState == ConnectionState.waiting) {
-                          return const Center(child: CircularProgressIndicator());
-                        } else if (itemSnapshot.hasError) {
-                          return Center(child: Text('Error: ${itemSnapshot.error}'));
-                        }
+                    List<Category> categories = categorySnapshot.data!;
+                    List<AuctionItems> auctionItems = auctionSnapshot.data ?? [];
 
-                        List<AuctionItems> auctionItems = itemSnapshot.data!
+                    return ListView.builder(
+                      itemCount: categories.length,
+                      itemBuilder: (context, index) {
+                        List<AuctionItems> filteredItems = auctionItems
                             .where((item) => item.category?.category_id == categories[index].category_id)
                             .toList();
 
@@ -138,9 +139,10 @@ class _CategoryItemPageState extends State<CategoryItemPage> {
                             ),
                             SizedBox(
                               height: 250,
-                              child: ListView.builder(
+                              child: filteredItems.isNotEmpty
+                                  ? ListView.builder(
                                 scrollDirection: Axis.horizontal,
-                                itemCount: auctionItems.length,
+                                itemCount: filteredItems.length,
                                 itemBuilder: (context, itemIndex) {
                                   return GestureDetector(
                                     onTap: () {
@@ -148,7 +150,8 @@ class _CategoryItemPageState extends State<CategoryItemPage> {
                                         context,
                                         MaterialPageRoute(
                                           builder: (context) => Auction_ItemsDetailPage(
-                                            item: auctionItems[itemIndex],
+                                            item: filteredItems[itemIndex],
+                                            allItems: filteredItems,
                                           ),
                                         ),
                                       );
@@ -162,8 +165,8 @@ class _CategoryItemPageState extends State<CategoryItemPage> {
                                           ClipRRect(
                                             borderRadius: BorderRadius.circular(15),
                                             child: Image.network(
-                                              auctionItems[itemIndex].images?.isNotEmpty ?? false
-                                                  ? auctionItems[itemIndex].images!.first
+                                              filteredItems[itemIndex].images?.isNotEmpty ?? false
+                                                  ? filteredItems[itemIndex].images!.first
                                                   : 'https://via.placeholder.com/150',
                                               width: 150,
                                               height: 150,
@@ -173,7 +176,7 @@ class _CategoryItemPageState extends State<CategoryItemPage> {
                                           Padding(
                                             padding: const EdgeInsets.all(8.0),
                                             child: Text(
-                                              auctionItems[itemIndex].itemName ?? 'No Name',
+                                              filteredItems[itemIndex].itemName ?? 'No Name',
                                               style: const TextStyle(
                                                 fontSize: 16,
                                                 fontWeight: FontWeight.bold,
@@ -187,7 +190,8 @@ class _CategoryItemPageState extends State<CategoryItemPage> {
                                     ),
                                   );
                                 },
-                              ),
+                              )
+                                  : const Center(child: Text('No items available')),
                             ),
                           ],
                         );
