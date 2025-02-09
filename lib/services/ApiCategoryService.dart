@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:fe/models/Category.dart';
 
 class ApiCategoryService{
-  static const String url = "http://172.16.1.11:8080/api";
+  static const String url = "http://192.168.1.20:8080/api";
   static const String urlCategory = "$url/category";
 
   // Get all Category entries

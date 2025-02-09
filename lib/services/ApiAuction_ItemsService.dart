@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 
 
 class ApiAuction_ItemsService {
-  static const String url = "http://172.16.1.11:8080/api";
+  static const String url = "http://192.168.1.20:8080/api";
   static const String urlAuctionItems = "$url/auction";
 
   Future<List<AuctionItems>> getAllAuctionItems() async {
@@ -49,34 +49,6 @@ class ApiAuction_ItemsService {
     }
   }
 
-
-  Future<List<AuctionItems>> getAllAuctionItemsn() async {
-    try {
-      final response = await http.get(Uri.parse(urlAuctionItems));
-
-      if (response.statusCode == 200) {
-        var data = json.decode(response.body);
-        List<AuctionItems> list = [];
-
-        print("Decoded auction items data: $data");
-
-        for (var item in data['result']['data']) { // Adjust the data path based on your actual JSON structure
-          AuctionItems auctionItems = AuctionItems.fromJson(item);
-          list.add(auctionItems);
-        }
-        print("Fetched ${list.length} auction items.");
-        return list;
-      } else {
-        print("Error: ${response.body}");
-        throw Exception('Failed to load auction items data');
-      }
-    } catch (e) {
-      print("Error fetching auction items data: $e");
-      throw Exception('Error fetching auction items data: $e');
-    }
-  }
-
-
   Future<AuctionItems?> getAuctionItemById(int id) async {
     try {
       print("Sending GET request to: $urlAuctionItems/$id");
@@ -117,5 +89,33 @@ class ApiAuction_ItemsService {
     }
   }
 
+  static Future<List<AuctionItems>> getAuctionItemsBySearch(String query) async {
+    try {
+      final response = await http.get(Uri.parse("$urlAuctionItems/search?query=$query"));
+      print("Searching auction items with query: $query");
+
+      if (response.statusCode == 200) {
+        var jsonData = json.decode(response.body);
+        List<AuctionItems> searchResults = [];
+
+        if (jsonData['result'] != null) {
+          List data = jsonData['result']['data'];
+          for (var item in data) {
+            try {
+              searchResults.add(AuctionItems.fromJson(item));
+            } catch (e) {
+              print("Error parsing search item: $e");
+            }
+          }
+        }
+        return searchResults;
+      } else {
+        throw Exception('Failed to search auction items');
+      }
+    } catch (e) {
+      print("Error: $e");
+      throw Exception('Error searching auction items: $e');
+    }
+  }
 }
 
