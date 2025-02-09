@@ -1,3 +1,4 @@
+import 'package:fe/pages/BottomNavigationIcon.dart';
 import 'package:fe/pages/CategoryItemsPage.dart';
 import 'package:fe/pages/Login.dart';
 import 'package:flutter/material.dart';
@@ -13,7 +14,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      home: CategoryItemPage(),
+      home: BottomNavigationIcon(),
     );
   }
 }

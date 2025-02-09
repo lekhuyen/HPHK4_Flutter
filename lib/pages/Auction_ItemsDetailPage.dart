@@ -39,10 +39,12 @@ class _Auction_ItemsDetailPageState extends State<Auction_ItemsDetailPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.item.itemName ?? 'Item Details'),
-        backgroundColor: Colors.greenAccent,
+        backgroundColor: Colors.white,
       ),
+      backgroundColor: Colors.white,  // Set the background color to white
       body: Padding(
         padding: const EdgeInsets.all(16.0),
+
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -101,7 +103,7 @@ class _Auction_ItemsDetailPageState extends State<Auction_ItemsDetailPage> {
                   );
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green, // Button color
+                  backgroundColor: Colors.white, // Button color
                   padding: EdgeInsets.symmetric(vertical: 15), // Adjust padding for height
                   textStyle: const TextStyle(fontSize: 16),
                 ),

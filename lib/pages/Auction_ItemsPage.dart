@@ -35,20 +35,25 @@ class _Auction_ItemsPageState extends State<Auction_ItemsPage> {
           ),
         );
       },
-      child: Card(
-        elevation: 3,
+      child: Container(
+        decoration: const BoxDecoration(
+          color: Colors.white, // Set card background color to white
+        ),
         margin: const EdgeInsets.all(8),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Image.network(
-              imageUrl,
-              width: double.infinity,
-              height: 150,  // Adjust height to fit in the grid
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) {
-                return Image.network('https://via.placeholder.com/150', width: double.infinity, height: 150, fit: BoxFit.cover);
-              },
+            ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: Image.network(
+                imageUrl,
+                width: double.infinity,
+                height: 150,  // Adjust height to fit in the grid
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) {
+                  return Image.network('https://via.placeholder.com/150', width: double.infinity, height: 150, fit: BoxFit.cover);
+                },
+              ),
             ),
             Padding(
               padding: const EdgeInsets.all(8.0),
@@ -80,8 +85,10 @@ class _Auction_ItemsPageState extends State<Auction_ItemsPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Items in ${widget.category.category_name}'),
-        backgroundColor: Colors.greenAccent,
+        backgroundColor: Colors.white,
+        elevation: 0,  // Optional, removes shadow under the app bar
       ),
+      backgroundColor: Colors.white,  // Set the background color of the entire screen
       body: FutureBuilder<List<AuctionItems>>(
         future: futureAuctionItems,
         builder: (context, snapshot) {
