@@ -7,6 +7,8 @@ import 'package:fe/services/ApiAuction_ItemsService.dart';
 import 'package:fe/pages/Auction_ItemsPage.dart';
 import 'package:fe/pages/CategoryItemSearchPage.dart';
 
+import 'HomePage.dart';
+
 class CategoryItemPage extends StatefulWidget {
   const CategoryItemPage({super.key});
 
@@ -147,12 +149,12 @@ class _CategoryItemPageState extends State<CategoryItemPage> {
                                       Navigator.push(
                                         context,
                                         MaterialPageRoute(
-                                          builder: (context) => Auction_ItemsDetailPage(
-                                            item: auctionItems[itemIndex],
-                                          ),
+                                          builder: (context) => Homepage(initialIndex: 0, selectedItem: auctionItems[itemIndex]), // 🔥 Mở trong HomePage
+
                                         ),
                                       );
                                     },
+
                                     child: Container(
                                       margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
                                       child: Column(

@@ -6,6 +6,8 @@ import 'package:fe/services/ApiAuction_ItemsService.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'HomePage.dart';
+
 class CategoryItemSearchPage extends StatefulWidget {
   const CategoryItemSearchPage({super.key});
 
@@ -216,7 +218,7 @@ class _CategoryItemSearchPageState extends State<CategoryItemSearchPage> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => Auction_ItemsDetailPage(item: item),
+                        builder: (context) => Homepage(initialIndex: 0, selectedItem: item), // 🔥 Mở trong HomePage
                       ),
                     );
                   },

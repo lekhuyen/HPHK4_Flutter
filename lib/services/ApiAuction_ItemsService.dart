@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 
 
 class ApiAuction_ItemsService {
-  static const String url = "http://192.168.1.20:8080/api";
+  static const String url = "http://173.16.16.178:8080/api";
   static const String urlAuctionItems = "$url/auction";
 
   Future<List<AuctionItems>> getAllAuctionItems() async {
@@ -49,6 +49,34 @@ class ApiAuction_ItemsService {
     }
   }
 
+
+  Future<List<AuctionItems>> getAllAuctionItemsn() async {
+    try {
+      final response = await http.get(Uri.parse(urlAuctionItems));
+
+      if (response.statusCode == 200) {
+        var data = json.decode(response.body);
+        List<AuctionItems> list = [];
+
+        print("Decoded auction items data: $data");
+
+        for (var item in data['result']['data']) { // Adjust the data path based on your actual JSON structure
+          AuctionItems auctionItems = AuctionItems.fromJson(item);
+          list.add(auctionItems);
+        }
+        print("Fetched ${list.length} auction items.");
+        return list;
+      } else {
+        print("Error: ${response.body}");
+        throw Exception('Failed to load auction items data');
+      }
+    } catch (e) {
+      print("Error fetching auction items data: $e");
+      throw Exception('Error fetching auction items data: $e');
+    }
+  }
+
+
   Future<AuctionItems?> getAuctionItemById(int id) async {
     try {
       print("Sending GET request to: $urlAuctionItems/$id");
@@ -89,33 +117,76 @@ class ApiAuction_ItemsService {
     }
   }
 
-  static Future<List<AuctionItems>> getAuctionItemsBySearch(String query) async {
+  Future<List<AuctionItems>> fetchFeaturedAuctions() async {
+    final response = await http.get(Uri.parse('$urlAuctionItems/featured'));
+
+    if (response.statusCode == 200) {
+      List<dynamic> data = jsonDecode(response.body)['result'];
+      return data.map((item) => AuctionItems.fromJson(item)).toList();
+    } else {
+      throw Exception("Failed to load featured auctions");
+    }
+  }
+
+  Future<List<AuctionItems>> fetchUpcomingAuctions() async {
+    final response = await http.get(Uri.parse('$urlAuctionItems/upcoming'));
+    if (response.statusCode == 200) {
+      List<dynamic> data = jsonDecode(response.body)['result'];
+      return data.map((item) => AuctionItems.fromJson(item)).toList();
+    } else {
+      throw Exception("Failed to load upcoming auctions");
+    }
+  }
+  Future<List<AuctionItems>> getItemsByCategory(String categoryId) async {
     try {
-      final response = await http.get(Uri.parse("$urlAuctionItems/search?query=$query"));
-      print("Searching auction items with query: $query");
+      final response = await http.get(Uri.parse('$urlAuctionItems/category/$categoryId?size=100'));
 
       if (response.statusCode == 200) {
         var jsonData = json.decode(response.body);
-        List<AuctionItems> searchResults = [];
+        List<AuctionItems> list = [];
 
         if (jsonData['result'] != null) {
-          List data = jsonData['result']['data'];
-          for (var item in data) {
-            try {
-              searchResults.add(AuctionItems.fromJson(item));
-            } catch (e) {
-              print("Error parsing search item: $e");
-            }
+          for (var item in jsonData['result']['data']) {
+            AuctionItems auctionItem = AuctionItems.fromJson(item);
+            list.add(auctionItem);
           }
         }
-        return searchResults;
+        print("✅ Fetched ${list.length} items from category $categoryId");
+        return list;
       } else {
-        throw Exception('Failed to search auction items');
+        throw Exception('Failed to load items by category');
       }
     } catch (e) {
-      print("Error: $e");
-      throw Exception('Error searching auction items: $e');
+      print("🚨 Error fetching items by category: $e");
+      throw Exception('Error fetching items by category: $e');
     }
   }
+
+
+  Future<int?> getCategoryIdByName(String categoryName) async {
+    final response = await http.get(Uri.parse('http://173.16.16.178:8080/api/category'));
+
+    if (response.statusCode == 200) {
+      var jsonData = json.decode(response.body);
+
+      if (jsonData['result'] != null && jsonData['result']['data'] != null) {
+        List<dynamic> categories = jsonData['result']['data'];
+
+        for (var category in categories) {
+          String? apiCategoryName = category['category_name']; // Đọc đúng key từ API
+
+          if (apiCategoryName != null && apiCategoryName.trim() == categoryName.trim()) {
+            return category['category_id']; // Trả về ID nếu tìm thấy
+          }
+        }
+      }
+    }
+    print("⚠️ Không tìm thấy category ID cho $categoryName");
+    return null;
+  }
+
+
+
+
 }
 

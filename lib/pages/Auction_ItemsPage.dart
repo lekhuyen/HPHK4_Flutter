@@ -22,7 +22,6 @@ class _Auction_ItemsPageState extends State<Auction_ItemsPage> {
     super.initState();
     futureAuctionItems = apiService.getAllAuctionItems();
   }
-
   Widget buildAuctionItemCard(AuctionItems item) {
     String imageUrl = item.images?.isNotEmpty ?? false ? item.images!.first : 'https://via.placeholder.com/150';
 
@@ -93,10 +92,10 @@ class _Auction_ItemsPageState extends State<Auction_ItemsPage> {
         future: futureAuctionItems,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(
+            return const Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: const [
+                children: [
                   CircularProgressIndicator(),
                   SizedBox(height: 10),
                   Text('Loading auction items...'),
