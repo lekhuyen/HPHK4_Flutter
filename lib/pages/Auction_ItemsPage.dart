@@ -23,32 +23,46 @@ class _Auction_ItemsPageState extends State<Auction_ItemsPage> {
     futureAuctionItems = apiService.getAllAuctionItems();
   }
 
-  Widget buildAuctionItemCard(AuctionItems item) {
+  Widget buildAuctionItemCard(AuctionItems item, List<AuctionItems> allItems) {
     String imageUrl = item.images?.isNotEmpty ?? false ? item.images!.first : 'https://via.placeholder.com/150';
 
     return GestureDetector(
       onTap: () {
+        // Get items from the same category
+        List<AuctionItems> relatedItems = allItems
+            .where((auctionItem) => auctionItem.categoryId == item.categoryId)
+            .toList();
+
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => Auction_ItemsDetailPage(item: item),
+            builder: (context) => Auction_ItemsDetailPage(
+              item: item,
+              allItems: relatedItems, // Pass related items
+            ),
           ),
         );
       },
-      child: Card(
-        elevation: 3,
+      child: Container(
+        decoration: const BoxDecoration(
+          color: Colors.white,
+        ),
         margin: const EdgeInsets.all(8),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Image.network(
-              imageUrl,
-              width: double.infinity,
-              height: 150,  // Adjust height to fit in the grid
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) {
-                return Image.network('https://via.placeholder.com/150', width: double.infinity, height: 150, fit: BoxFit.cover);
-              },
+            ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: Image.network(
+                imageUrl,
+                width: double.infinity,
+                height: 150,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) {
+                  return Image.network('https://via.placeholder.com/150',
+                      width: double.infinity, height: 150, fit: BoxFit.cover);
+                },
+              ),
             ),
             Padding(
               padding: const EdgeInsets.all(8.0),
@@ -75,21 +89,24 @@ class _Auction_ItemsPageState extends State<Auction_ItemsPage> {
     );
   }
 
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('Items in ${widget.category.category_name}'),
-        backgroundColor: Colors.greenAccent,
+        backgroundColor: Colors.white,
+        elevation: 0,  // Optional, removes shadow under the app bar
       ),
+      backgroundColor: Colors.white,  // Set the background color of the entire screen
       body: FutureBuilder<List<AuctionItems>>(
         future: futureAuctionItems,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(
+            return const Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: const [
+                children: [
                   CircularProgressIndicator(),
                   SizedBox(height: 10),
                   Text('Loading auction items...'),
@@ -123,7 +140,7 @@ class _Auction_ItemsPageState extends State<Auction_ItemsPage> {
               ),
               itemCount: filteredItems.length,
               itemBuilder: (context, index) {
-                return buildAuctionItemCard(filteredItems[index]);
+                return buildAuctionItemCard(filteredItems[index], filteredItems);
               },
             ),
           );
