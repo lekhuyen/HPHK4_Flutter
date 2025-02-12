@@ -10,7 +10,6 @@ import 'package:intl/intl.dart'; // Add this import at the top
 
 class CreateAuctionItemsPage extends StatefulWidget {
   const CreateAuctionItemsPage({super.key});
-
   @override
   State createState() => _CreateAuctionItemsPageState();
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/User.dart';
 import '../services/ApiUserService.dart';
+import 'CreateAuctionItemsPage.dart';
 import 'MyAuctionPage.dart';
 
 class LoginPage extends StatefulWidget {
@@ -345,14 +346,20 @@ class _LoginPageState extends State<LoginPage> {
 
               // Các mục chỉ hiển thị khi người dùng đã đăng nhập
               if (_username != null) ...[
-                _buildListTile("My Account",(){}),
-                _buildListTile("Create Auction",(){}),
+                _buildListTile("My Account", () {}),
+                _buildListTile("Create Auction", () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const CreateAuctionItemsPage()),
+                  );
+                }),
                 _buildListTile("Won Items", () {}),
-                _buildListTile("Notifications",() {}),
-                _buildListTile("Message",() {}),
-                _buildListTile("Device Settings",() {}),
+                _buildListTile("Notifications", () {}),
+                _buildListTile("Message", () {}),
+                _buildListTile("Device Settings", () {}),
                 const Divider(),
               ],
+
 
               _buildListTile("Help Center",() {}),
               _buildListTile("Send App Feedback",() {}),
