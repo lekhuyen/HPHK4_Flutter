@@ -86,13 +86,23 @@
       startingPrice = json["starting_price"];
       currentPrice = json["current_price"];
 
-      // Handle the startDate and endDate as a list and convert to DateTime
-      startDate = json["start_date"] != null
-          ? DateTime(json["start_date"][0], json["start_date"][1], json["start_date"][2])
-          : null;
-      endDate = json["end_date"] != null
-          ? DateTime(json["end_date"][0], json["end_date"][1], json["end_date"][2])
-          : null;
+      // ✅ Chuyển đổi start_date từ List<int> thành DateTime
+      if (json["start_date"] is List && json["start_date"].length == 3) {
+        startDate = DateTime(json["start_date"][0], json["start_date"][1], json["start_date"][2]);
+      } else {
+        startDate = null;
+      }
+
+      // ✅ Chuyển đổi end_date từ List<int> thành DateTime
+      if (json["end_date"] is List && json["end_date"].length == 3) {
+        endDate = DateTime(json["end_date"][0], json["end_date"][1], json["end_date"][2]);
+      } else {
+        endDate = null;
+      }
+
+      // ✅ In ra để kiểm tra lỗi
+      print("📢 startDate: $startDate, endDate: $endDate");
+
 
       bidStep = json["bid_step"];
       issell = json["sell"];
@@ -101,19 +111,23 @@
       width = json["width"];
       height = json["height"];
 
-      // Convert string date to DateTime objects for createdAt and updatedAt
-      createdat = json["createdAt"] != null ? DateTime.parse(json["createdAt"].toString()) : null;
-      updatedat = json["updatedAt"] != null ? DateTime.parse(json["updatedAt"].toString()) : null;
+      // ✅ Kiểm tra createdAt và updatedAt trước khi parse
+      if (json["createdAt"] != null) {
+        print("📢 createdAt: ${json["createdAt"]}");
+        createdat = DateTime.tryParse(json["createdAt"].toString());
+      }
 
-      // Handling images as List<String>
+      if (json["updatedAt"] != null) {
+        print("📢 updatedAt: ${json["updatedAt"]}");
+        updatedat = DateTime.tryParse(json["updatedAt"].toString());
+      }
+
       images = json["images"] != null ? List<String>.from(json["images"]) : [];
 
-      // Handle category as an instance of Category
       if (json['category'] != null) {
         category = Category.fromJson(json['category']);
       }
 
-      // Optionally, if you want to also keep categoryId and categoryName separately
       categoryId = json['category'] != null ? json['category']['category_id'] : null;
       categoryName = json['category'] != null ? json['category']['category_name'] : null;
     }

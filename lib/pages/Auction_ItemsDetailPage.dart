@@ -22,8 +22,26 @@ class _Auction_ItemsDetailPageState extends State<Auction_ItemsDetailPage> {
     super.initState();
     apiService = ApiAuction_ItemsService();
     fetchSimilarItems();
+    fetchUpcomingItems();
   }
+  List<AuctionItems> upcomingItems = [];
+  bool isLoadingUpcomingItems = true;
+  /// Gọi API để lấy danh sách sản phẩm sắp tới
+  Future<void> fetchUpcomingItems() async {
+    try {
+      print("🔍 Fetching upcoming auction items...");
+      var fetchedItems = await apiService.fetchUpcomingAuctions();
+      print("✅ Fetched ${fetchedItems.length} upcoming items.");
 
+      setState(() {
+        upcomingItems = fetchedItems;
+        isLoadingUpcomingItems = false;
+      });
+    } catch (e) {
+      print("🚨 Lỗi khi tải sản phẩm sắp tới: $e");
+      setState(() => isLoadingUpcomingItems = false);
+    }
+  }
   /// Tính thời gian còn lại của phiên đấu giá
   String getTimeLeft(DateTime? endDate) {
     if (endDate == null) return "No End Date";
@@ -84,12 +102,15 @@ class _Auction_ItemsDetailPageState extends State<Auction_ItemsDetailPage> {
         title: Text(widget.item.itemName ?? 'Item Details'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () {
+            Navigator.pushReplacement(
+              context,
+                MaterialPageRoute(
+                builder: (context) => const Homepage(initialIndex: 0), // 🔥 Quay về trang chính
+              ),
+            );
+          },
         ),
-        actions: [
-          IconButton(icon: const Icon(Icons.share), onPressed: () {}),
-          IconButton(icon: const Icon(Icons.favorite_border), onPressed: () {}),
-        ],
       ),
 
 
@@ -148,7 +169,7 @@ class _Auction_ItemsDetailPageState extends State<Auction_ItemsDetailPage> {
             const SizedBox(height: 8),
             OutlinedButton(
               onPressed: () {},
-              child: const SizedBox(width: double.infinity, child: Center(child: Text("SAVE ITEM"))),
+              child: const SizedBox(width: double.infinity, child: Center(child: Text("Payment"))),
             ),
             const Divider(),
 
@@ -158,11 +179,63 @@ class _Auction_ItemsDetailPageState extends State<Auction_ItemsDetailPage> {
             Text(widget.item.description ?? 'No Description Available.'),
             const Divider(),
             const Text('Upcomming Items Available Now', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 16),
 
-            const SizedBox(
-              height: 250,
+            SizedBox(
+              height: 250, // 🔥 Tăng chiều cao nếu cần
+              child: isLoadingUpcomingItems
+                  ? const Center(child: CircularProgressIndicator())  // Hiển thị vòng xoay nếu đang tải
+                  : upcomingItems.isEmpty
+                  ? const Center(child: Text("No upcoming items found"))
+                  : ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: upcomingItems.length,
+                itemBuilder: (context, index) {
+                  var item = upcomingItems[index];
+                  String itemImageUrl = (item.images != null && item.images!.isNotEmpty)
+                      ? item.images!.first
+                      : 'https://via.placeholder.com/150';
 
+                  return GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => Homepage(initialIndex: 0, selectedItem: item), // 🔥 Mở trong HomePage
+                        ),
+                      );
+                    },
+
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: Image.network(
+                              itemImageUrl,
+                              width: 150, // 🔥 Kích thước ảnh
+                              height: 120,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) {
+                                return Image.asset('assets/placeholder.jpg', width: 150, height: 120, fit: BoxFit.cover);
+                              },
+                            ),
+                          ),
+                          const SizedBox(height: 5),
+                          Text(item.itemName ?? 'No Name', maxLines: 1, overflow: TextOverflow.ellipsis),
+                          Text("\$${item.startingPrice ?? 0}", style: const TextStyle(fontWeight: FontWeight.bold)),
+                          Text("${item.bidStep ?? 0} Bids", style: TextStyle(color: Colors.grey[600])),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
             ),
+            const Divider(),
+
             const Divider(),
             /// Danh sách sản phẩm liên quan
             const Text('Similar Items Available Now',
@@ -188,10 +261,11 @@ class _Auction_ItemsDetailPageState extends State<Auction_ItemsDetailPage> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => Auction_ItemsDetailPage(item: item),
+                          builder: (context) => Homepage(initialIndex: 0, selectedItem: item), // 🔥 Mở trong HomePage
                         ),
                       );
                     },
+
                     child: Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: Column(

@@ -1,13 +1,13 @@
 import 'package:fe/pages/LoginPage.dart';
-import 'package:fe/pages/ProductDetailPage.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/Auction_Items.dart';
 import '../models/Category.dart';
 import 'Auction_ItemsDetailPage.dart';
 import 'Auction_ItemsPage.dart';
 import 'AuctionsPage.dart';
 import 'CategoryItemsPage.dart';
-import 'FavoritesPage.dart';
+import 'MyAuctionPage.dart';
 import 'MyBidsPage.dart';
 
 class Homepage extends StatefulWidget {
@@ -33,25 +33,40 @@ class _HomepageState extends State<Homepage> {
 
   List<Widget> _getPages() {
     if (_selectedItem != null) {
-      return [Auction_ItemsDetailPage(item: _selectedItem!)]; // 🔥 Hiển thị trang chi tiết nếu có sản phẩm
+      return [Auction_ItemsDetailPage(item: _selectedItem!)]; // 🔥 Nếu có sản phẩm, hiển thị trang chi tiết
     }
     return [
       const CategoryItemPage(),
       const AuctionsPage(),
-      const FavoritesPage(),
+      const MyAuctionPage(userId: '',),
       const MyBidsPage(),
       const LoginPage(),
-      Auction_ItemsPage(category: Category(category_id: 0, category_name: "All Auctions")), // 🔥 Truyền danh mục mặc định
     ];
   }
 
+  Future<void> _onItemTapped(int index) async {
+    if (index == 2) { // Nếu "MyAuction" ở vị trí thứ 3
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? userId = prefs.getString('userId');
 
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-      _selectedItem = null; // 🔥 Khi chuyển tab, thoát khỏi trang chi tiết
-    });
+      print("📢 userId từ SharedPreferences: $userId"); // ✅ In ra để kiểm tra
+
+      if (userId != null && userId.isNotEmpty) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => MyAuctionPage(userId: userId)),
+        );
+      } else {
+        print("⚠️ User chưa đăng nhập hoặc không có userId!");
+      }
+    } else {
+      setState(() {
+        _selectedIndex = index;
+      });
+    }
   }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -67,7 +82,7 @@ class _HomepageState extends State<Homepage> {
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Discover'),
           BottomNavigationBarItem(icon: Icon(Icons.gavel), label: 'Auctions'),
-          BottomNavigationBarItem(icon: Icon(Icons.favorite), label: 'Favorites'),
+          BottomNavigationBarItem(icon: Icon(Icons.account_balance_sharp), label: 'MyAuction'),
           BottomNavigationBarItem(icon: Icon(Icons.shopping_cart), label: 'My Bids'),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Me'),
         ],

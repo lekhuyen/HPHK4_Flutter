@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../models/Auction_Items.dart';
 import '../services/ApiAuction_ItemsService.dart';
+import 'Auction_ItemsDetailPage.dart';
 
 class AuctionsPage extends StatefulWidget {
   const AuctionsPage({super.key});
@@ -18,7 +19,7 @@ class _AuctionsPageState extends State<AuctionsPage> with SingleTickerProviderSt
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length:2 , vsync: this);
     _featuredItems = ApiAuction_ItemsService().fetchFeaturedAuctions();
     _upcomingItems = ApiAuction_ItemsService().fetchUpcomingAuctions();
   }
@@ -33,18 +34,18 @@ class _AuctionsPageState extends State<AuctionsPage> with SingleTickerProviderSt
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.brown[900],
-        title: const Text('Auctions', style: TextStyle(color: Colors.white)),
+        backgroundColor: Colors.white,
+        title: const Text('Auctions', style: TextStyle(color: Colors.black)),
         centerTitle: true,
         bottom: TabBar(
           controller: _tabController,
-          labelColor: Colors.white,
+          labelColor: Colors.black,
           unselectedLabelColor: Colors.grey,
           indicatorColor: Colors.blue,
           tabs: const [
             Tab(text: 'Featured'),
             Tab(text: 'Upcoming'),
-            Tab(text: 'Near Me'),
+
           ],
         ),
       ),
@@ -53,7 +54,7 @@ class _AuctionsPageState extends State<AuctionsPage> with SingleTickerProviderSt
         children: [
           _buildAuctionList(_featuredItems),
           _buildAuctionList(_upcomingItems),
-          Container(), // Placeholder for Near Me tab
+
         ],
       ),
     );
@@ -83,39 +84,57 @@ class _AuctionsPageState extends State<AuctionsPage> with SingleTickerProviderSt
   }
 
   Widget _buildAuctionCard(AuctionItems item) {
-    return Card(
-      color: Colors.white,
-      margin: const EdgeInsets.symmetric(vertical: 10),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (item.images != null && item.images!.isNotEmpty)
-            Image.network(
-              item.images![0],
-              width: double.infinity,
-              height: 200,
-              fit: BoxFit.cover,
-            ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: ListTile(
-              title: Text(item.itemName ?? "No Title", style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
-              subtitle: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(item.description ?? "No Description", style: const TextStyle(color: Colors.black)),
-                  Text("Start: ${item.startDate}", style: const TextStyle(color: Colors.black)),
-                  Text("End: ${item.endDate}", style: const TextStyle(color: Colors.black)),
-                ],
-              ),
-              trailing: ElevatedButton(
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.blueGrey),
-                onPressed: () {},
-                child: const Text('Bid Now', style: TextStyle(color: Colors.white)),
-              ),
-            ),
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => Auction_ItemsDetailPage(item: item),
           ),
-        ],
+        );
+      },
+      child: Card(
+        color: Colors.white,
+        margin: const EdgeInsets.symmetric(vertical: 10),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (item.images != null && item.images!.isNotEmpty)
+              Image.network(
+                item.images![0],
+                width: double.infinity,
+                height: 200,
+                fit: BoxFit.cover,
+              ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: ListTile(
+                title: Text(item.itemName ?? "No Title",
+                    style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+                subtitle: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(item.description ?? "No Description", style: const TextStyle(color: Colors.black)),
+                    Text("Start: ${item.startDate}", style: const TextStyle(color: Colors.black)),
+                    Text("End: ${item.endDate}", style: const TextStyle(color: Colors.black)),
+                  ],
+                ),
+                trailing: ElevatedButton(
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.blueGrey),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => Auction_ItemsDetailPage(item: item),
+                      ),
+                    );
+                  },
+                  child: const Text('Bid Now', style: TextStyle(color: Colors.white)),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:fe/models/Auction_Items.dart';
 import 'package:fe/services/ApiAuction_ItemsService.dart';
 import 'package:fe/models/Category.dart';
-import 'package:fe/pages/Auction_ItemsDetailPage.dart'; // Import the detail page
+import 'package:fe/pages/Auction_ItemsDetailPage.dart';
+
+import 'HomePage.dart'; // Import the detail page
 
 class Auction_ItemsPage extends StatefulWidget {
   final Category category;
@@ -30,10 +32,13 @@ class _Auction_ItemsPageState extends State<Auction_ItemsPage> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => Auction_ItemsDetailPage(item: item),
+            builder: (context) => Auction_ItemsDetailPage(item: item), // Mở trang chi tiết đúng
           ),
         );
+
       },
+
+
       child: Container(
         decoration: const BoxDecoration(
           color: Colors.white, // Set card background color to white

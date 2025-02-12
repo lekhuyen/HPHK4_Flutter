@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 
 
 class ApiAuction_ItemsService {
-  static const String url = "http://173.16.16.178:8080/api";
+  static const String url = "http://173.16.17.55:8080/api";
   static const String urlAuctionItems = "$url/auction";
 
   Future<List<AuctionItems>> getAllAuctionItems() async {
@@ -164,7 +164,7 @@ class ApiAuction_ItemsService {
 
 
   Future<int?> getCategoryIdByName(String categoryName) async {
-    final response = await http.get(Uri.parse('http://173.16.16.178:8080/api/category'));
+    final response = await http.get(Uri.parse('http://173.16.17.55:8080/api/category'));
 
     if (response.statusCode == 200) {
       var jsonData = json.decode(response.body);
@@ -184,6 +184,27 @@ class ApiAuction_ItemsService {
     print("⚠️ Không tìm thấy category ID cho $categoryName");
     return null;
   }
+
+  Future<List<AuctionItems>> fetchAuctionsByCreator(String userId) async {
+    final response = await http.get(Uri.parse('http://173.16.17.55:8080/api/auction/creator/$userId'));
+
+    print("📢 API RESPONSE STATUS: ${response.statusCode}");
+    print("📢 API BODY: ${response.body}");
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      print("📢 JSON Result: ${data['result']}"); // ✅ In dữ liệu trả về trước khi parse
+
+      return (data['result'] as List).map((item) {
+        print("📢 Item Data: $item"); // ✅ In từng item trước khi parse
+        return AuctionItems.fromJson(item);
+      }).toList();
+    } else {
+      throw Exception("API Error: ${response.statusCode} - ${response.body}");
+    }
+  }
+
+
 
 
 

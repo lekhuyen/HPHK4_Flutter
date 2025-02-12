@@ -4,8 +4,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../models/User.dart';
 
 class ApiUserService {
-  static const String baseUrl = "http://173.16.16.178:8080/api/users";
-  static const String loginUrl = "http://173.16.16.178:8080/api/auth";
+  static const String baseUrl = "http://173.16.17.55:8080/api/users";
+  static const String loginUrl = "http://173.16.17.55:8080/api/auth";
 
   Future<bool> registerUser(User user) async {
     try {
@@ -63,4 +63,6 @@ class ApiUserService {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.remove('username');
   }
+
+
 }

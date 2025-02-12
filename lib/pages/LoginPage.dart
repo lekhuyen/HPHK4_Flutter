@@ -2,15 +2,28 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/User.dart';
 import '../services/ApiUserService.dart';
+import 'MyAuctionPage.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
-
   @override
   _LoginPageState createState() => _LoginPageState();
 }
-
 class _LoginPageState extends State<LoginPage> {
+  Future<void> _navigateToMyAuctions() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? userId = prefs.getString('userId'); // Giả sử bạn đã lưu userId vào SharedPreferences
+
+    if (userId != null) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => MyAuctionPage(userId: userId)),
+      );
+    } else {
+      print("⚠ User ID not found!");
+    }
+  }
+
   final ApiUserService _apiUserService = ApiUserService();
   String? _username;
 
@@ -31,6 +44,7 @@ class _LoginPageState extends State<LoginPage> {
       _username = null;
     });
   }
+
 
  void _showSignUpDialog(BuildContext context) {
     final TextEditingController usernameController = TextEditingController();
@@ -192,12 +206,26 @@ class _LoginPageState extends State<LoginPage> {
                     String password = passwordController.text;
                     var response = await _apiUserService.loginUser(email, password);
                     if (response != null) {
-                      setState(() {
-                        _username = response['username'];
-                      });
-                      _showMessage(context, "Login Successful!");
-                      Navigator.pop(context);
-                    } else {
+                      var result = response['result'];
+
+                      print("📢 API Response: $result"); // ✅ In toàn bộ response để kiểm tra
+
+                      if (result != null && result.containsKey('userId')) {
+                        String userId = result['userId'];
+                        print("✅ userId lấy được: $userId"); // ✅ In userId để kiểm tra
+                        SharedPreferences prefs = await SharedPreferences.getInstance();
+                        await prefs.setString('userId', userId); // ✅ Lưu userId vào SharedPreferences
+                        setState(() {
+                          _username = result['username'];
+                        });
+                        _showMessage(context, "Login Successful!");
+                        Navigator.pop(context);
+                      } else {
+                        print("🚨 Lỗi: userId không có trong response!");
+                      }
+                    }
+
+                    else {
                       _showMessage(context, "Login Failed! Check your credentials.");
                     }
                   },
@@ -317,22 +345,23 @@ class _LoginPageState extends State<LoginPage> {
 
               // Các mục chỉ hiển thị khi người dùng đã đăng nhập
               if (_username != null) ...[
-                _buildListTile("My Account"),
-                _buildListTile("Won Items"),
-                _buildListTile("Notifications"),
-                _buildListTile("Message"),
-                _buildListTile("Device Settings"),
+                _buildListTile("My Account",(){}),
+                _buildListTile("Create Auction",(){}),
+                _buildListTile("Won Items", () {}),
+                _buildListTile("Notifications",() {}),
+                _buildListTile("Message",() {}),
+                _buildListTile("Device Settings",() {}),
                 const Divider(),
               ],
 
-              _buildListTile("Help Center"),
-              _buildListTile("Send App Feedback"),
+              _buildListTile("Help Center",() {}),
+              _buildListTile("Send App Feedback",() {}),
 
               const Divider(),
-              _buildListTile("About LiveAuctioneers"),
-              _buildListTile("Terms & Conditions"),
-              _buildListTile("Privacy Policy"),
-              _buildListTile("Cookie Policy"),
+              _buildListTile("About LiveAuctioneers",() {}),
+              _buildListTile("Terms & Conditions",() {}),
+              _buildListTile("Privacy Policy",() {}),
+              _buildListTile("Cookie Policy",() {}),
 
               const SizedBox(height: 20),
 
@@ -350,16 +379,15 @@ class _LoginPageState extends State<LoginPage> {
       ),
     );
   }
-
-
-  Widget _buildListTile(String title) {
+  Widget _buildListTile(String title, VoidCallback onTap) {
     return ListTile(
       title: Text(title),
-      trailing:
-      const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
-      onTap: () {},
+      trailing: Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
+      onTap: onTap, // Gọi hàm điều hướng
     );
   }
+
+
   InputDecoration _inputDecoration(String label) {
     return InputDecoration(
       labelText: label,
