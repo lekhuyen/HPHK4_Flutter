@@ -4,8 +4,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../models/User.dart';
 
 class ApiUserService {
-  static const String baseUrl = "http://173.16.17.55:8080/api/users";
-  static const String loginUrl = "http://173.16.17.55:8080/api/auth";
+  static const String baseUrl = "http://192.168.1.30:8080/api/users";
+  static const String loginUrl = "http://192.168.1.30:8080/api/auth";
 
   Future<bool> registerUser(User user) async {
     try {
@@ -23,41 +23,23 @@ class ApiUserService {
   }
 
   Future<Map<String, dynamic>?> loginUser(String email, String password) async {
-    try {
-      final response = await http.post(
-        Uri.parse("$loginUrl/login"),
-        headers: {"Content-Type": "application/json"},
-        body: jsonEncode({
-          "email": email,
-          "password": password,
-        }),
-      );
+    final response = await http.post(
+      Uri.parse("http://192.168.1.30:8080/api/auth/login"),
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode({"email": email, "password": password}),
+    );
 
-      print("Response Status: ${response.statusCode}");
-      print("Response Body: ${response.body}");
+    print("📢 API LOGIN STATUS: ${response.statusCode}");
+    print("📢 API LOGIN BODY: ${response.body}");
 
-      if (response.statusCode == 200) {
-        var data = json.decode(response.body)["result"];
-
-        if (data == null || !data.containsKey("username")) {
-          print("Error: API response missing 'username' field!");
-          return null;
-        }
-
-        // Lưu username vào SharedPreferences
-        SharedPreferences prefs = await SharedPreferences.getInstance();
-        await prefs.setString('username', data["username"]);
-
-        return data;
-      } else {
-        print("Login failed: ${response.body}");
-        return null;
-      }
-    } catch (e) {
-      print("Exception: $e");
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body); // ✅ Decode JSON trước khi trả về
+    } else {
+      print("🚨 Lỗi đăng nhập: ${response.body}");
       return null;
     }
   }
+
   // Đăng xuất người dùng
   Future<void> logoutUser() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();

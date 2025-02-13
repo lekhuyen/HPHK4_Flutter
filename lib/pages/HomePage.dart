@@ -32,24 +32,29 @@ class _HomepageState extends State<Homepage> {
   }
 
   List<Widget> _getPages() {
-    if (_selectedItem != null) {
-      return [Auction_ItemsDetailPage(item: _selectedItem!)]; // 🔥 Nếu có sản phẩm, hiển thị trang chi tiết
-    }
-    return [
+    List<Widget> pages = [
       const CategoryItemPage(),
       const AuctionsPage(),
       const MyAuctionPage(userId: '',),
       const MyBidsPage(),
       const LoginPage(),
     ];
+
+    // Nếu có sản phẩm, thay thế trang đầu tiên bằng trang chi tiết
+    if (_selectedItem != null) {
+      pages[0] = Auction_ItemsDetailPage(item: _selectedItem!);
+    }
+
+    return pages;
   }
 
+
   Future<void> _onItemTapped(int index) async {
-    if (index == 2) { // Nếu "MyAuction" ở vị trí thứ 3
+    if (index == 2) { // Nếu chọn MyAuction
       SharedPreferences prefs = await SharedPreferences.getInstance();
       String? userId = prefs.getString('userId');
 
-      print("📢 userId từ SharedPreferences: $userId"); // ✅ In ra để kiểm tra
+      print("📢 userId từ SharedPreferences: $userId"); // ✅ Kiểm tra userId
 
       if (userId != null && userId.isNotEmpty) {
         Navigator.push(
@@ -66,12 +71,14 @@ class _HomepageState extends State<Homepage> {
     }
   }
 
-
-
   @override
   Widget build(BuildContext context) {
+    List<Widget> pages = _getPages(); // Lấy danh sách trang
+
     return Scaffold(
-      body: _getPages()[_selectedIndex],
+      body: (_selectedIndex >= 0 && _selectedIndex < pages.length)
+          ? pages[_selectedIndex]
+          : const Center(child: Text("Invalid Page Index")), // Tránh lỗi truy cập ngoài phạm vi
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         currentIndex: _selectedIndex,
@@ -89,4 +96,5 @@ class _HomepageState extends State<Homepage> {
       ),
     );
   }
+
 }

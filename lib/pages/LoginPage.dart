@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/User.dart';
@@ -39,6 +41,9 @@ class _LoginPageState extends State<LoginPage> {
       _username = prefs.getString('username');
     });
   }
+
+
+
   Future<void> _logout() async {
     await _apiUserService.logoutUser();
     setState(() {
@@ -207,23 +212,40 @@ class _LoginPageState extends State<LoginPage> {
                     String password = passwordController.text;
                     var response = await _apiUserService.loginUser(email, password);
                     if (response != null) {
-                      var result = response['result'];
+                      print("📢 Full API Response: $response"); // ✅ In toàn bộ dữ liệu trả về
 
-                      print("📢 API Response: $result"); // ✅ In toàn bộ response để kiểm tra
+                      if (response != null) {
+                        print("📢 Full API Response: $response"); // ✅ In toàn bộ dữ liệu trả về
 
-                      if (result != null && result.containsKey('userId')) {
-                        String userId = result['userId'];
-                        print("✅ userId lấy được: $userId"); // ✅ In userId để kiểm tra
-                        SharedPreferences prefs = await SharedPreferences.getInstance();
-                        await prefs.setString('userId', userId); // ✅ Lưu userId vào SharedPreferences
-                        setState(() {
-                          _username = result['username'];
-                        });
-                        _showMessage(context, "Login Successful!");
-                        Navigator.pop(context);
-                      } else {
-                        print("🚨 Lỗi: userId không có trong response!");
+                        if (response.containsKey('result')) { // ✅ Kiểm tra key 'result' tồn tại
+                          var result = response['result'];
+                          print("📢 API result: $result"); // ✅ Kiểm tra result có null không
+
+                          if (result != null && result.containsKey('userId') && result.containsKey('token')) {
+                            String userId = result['userId'];
+                            String token = result['token']; // ✅ Lấy token từ API
+                            print("✅ userId lấy được: $userId"); // ✅ In userId để kiểm tra
+                            print("✅ Token lấy được: $token"); // ✅ In token để kiểm tra
+
+                            SharedPreferences prefs = await SharedPreferences.getInstance();
+                            await prefs.setString('userId', userId); // ✅ Lưu userId vào SharedPreferences
+                            await prefs.setString('token', token); // ✅ Lưu token vào SharedPreferences
+
+                            setState(() {
+                              _username = result['username'];
+                            });
+
+                            _showMessage(context, "Login Successful!");
+                            Navigator.pop(context);
+                          } else {
+                            print("🚨 Lỗi: userId hoặc token không có trong result!");
+                          }
+                        } else {
+                          print("🚨 Lỗi: Response không có key 'result'!");
+                        }
                       }
+
+
                     }
 
                     else {
