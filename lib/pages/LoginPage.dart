@@ -34,7 +34,29 @@ class _LoginPageState extends State<LoginPage> {
   void initState() {
     super.initState();
     _loadUsername();
+    _loadUserData(); // Gọi hàm kiểm tra dữ liệu đăng nhập
   }
+
+  Future<void> _loadUserData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? username = prefs.getString('username');
+    String? userId = prefs.getString('userId');
+    String? token = prefs.getString('token');
+
+    print("📢 Kiểm tra dữ liệu đăng nhập:");
+    print("👤 Username: $username");
+    print("🆔 UserId: $userId");
+    print("🔑 Token: $token");
+
+    if (username != null && userId != null && token != null) {
+      setState(() {
+        _username = username;
+      });
+    } else {
+      print("🚨 Không tìm thấy thông tin đăng nhập!");
+    }
+  }
+
   Future<void> _loadUsername() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
@@ -45,10 +67,14 @@ class _LoginPageState extends State<LoginPage> {
 
 
   Future<void> _logout() async {
-    await _apiUserService.logoutUser();
-    setState(() {
-      _username = null;
-    });
+    print("🚨 Đang thực hiện logout!");
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.clear();
+    print("📢 Đã xóa dữ liệu đăng nhập!");
+
+    // Cập nhật lại UI
+    _username = null;
+    setState(() {});
   }
 
 

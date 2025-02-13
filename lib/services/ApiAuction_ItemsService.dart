@@ -28,7 +28,7 @@ class ApiAuction_ItemsService {
               try {
                 AuctionItems auctionItem = AuctionItems.fromJson(item);
                 allItems.add(auctionItem);
-                print("Added: ${auctionItem.itemName}");
+
               } catch (e) {
                 print("Error parsing auction item: $e");
               }
@@ -195,7 +195,7 @@ class ApiAuction_ItemsService {
 
     print("📢 API CALL: http://192.168.1.30:8080/api/auction/creator/$userId");
     print("📢 API RESPONSE STATUS: ${response.statusCode}");
-    print("📢 API BODY: ${response.body}");
+
 
     if (response.statusCode == 200) {
       try {

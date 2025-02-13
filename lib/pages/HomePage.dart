@@ -29,8 +29,23 @@ class _HomepageState extends State<Homepage> {
     super.initState();
     _selectedIndex = widget.initialIndex;
     _selectedItem = widget.selectedItem;
+    _checkUserLoginStatus();
   }
+  Future<void> _checkUserLoginStatus() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('token');
+    String? userId = prefs.getString('userId');
 
+    if (token == null || userId == null) {
+      print("🚨 Không tìm thấy token hoặc userId, quay về trang login!");
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const LoginPage()),
+      );
+    } else {
+      print("✅ Đã tìm thấy token và userId, tiếp tục đăng nhập!");
+    }
+  }
   List<Widget> _getPages() {
     List<Widget> pages = [
       const CategoryItemPage(),
@@ -62,7 +77,11 @@ class _HomepageState extends State<Homepage> {
           MaterialPageRoute(builder: (context) => MyAuctionPage(userId: userId)),
         );
       } else {
-        print("⚠️ User chưa đăng nhập hoặc không có userId!");
+        print("⚠️ User chưa đăng nhập, chuyển đến trang Login!");
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const LoginPage()), // 🟢 Chuyển đến LoginPage
+        );
       }
     } else {
       setState(() {

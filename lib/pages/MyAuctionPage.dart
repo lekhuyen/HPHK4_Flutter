@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/Auction_Items.dart';
 import '../services/ApiAuction_ItemsService.dart';
+import 'LoginPage.dart';
 
 class MyAuctionPage extends StatefulWidget {
   final String userId; // Truyền userId khi mở trang
@@ -21,6 +23,7 @@ class _MyAuctionPageState extends State<MyAuctionPage> with SingleTickerProvider
   @override
   void initState() {
     super.initState();
+    _checkLoginStatus(); // 🔥 Kiểm tra đăng nhập trước khi tải dữ liệu
     _tabController = TabController(length: 2, vsync: this);
 
     print("📢 userId truyền vào MyAuctionPage: ${widget.userId}"); // ✅ Kiểm tra userId
@@ -31,7 +34,20 @@ class _MyAuctionPageState extends State<MyAuctionPage> with SingleTickerProvider
       _fetchMyAuctions();
     }
   }
+  Future<void> _checkLoginStatus() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? userId = prefs.getString('userId');
 
+    if (userId == null) {
+      print("🚨 Không tìm thấy userId, quay về LoginPage!");
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const LoginPage()),
+      );
+    } else {
+      _fetchMyAuctions(); // 🔥 Nếu có userId thì mới tải danh sách sản phẩm
+    }
+  }
 
 
   Future<void> _fetchMyAuctions() async {
