@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 
 
 class ApiAuction_ItemsService {
-  static const String url = "http://173.16.17.55:8080/api";
+  static const String url = "http://192.168.1.30:8080/api";
   static const String urlAuctionItems = "$url/auction";
 
   Future<List<AuctionItems>> getAllAuctionItems() async {
@@ -164,7 +164,7 @@ class ApiAuction_ItemsService {
 
 
   Future<int?> getCategoryIdByName(String categoryName) async {
-    final response = await http.get(Uri.parse('http://173.16.17.55:8080/api/category'));
+    final response = await http.get(Uri.parse('http://192.168.1.30:8080/api/category'));
 
     if (response.statusCode == 200) {
       var jsonData = json.decode(response.body);
@@ -186,23 +186,46 @@ class ApiAuction_ItemsService {
   }
 
   Future<List<AuctionItems>> fetchAuctionsByCreator(String userId) async {
-    final response = await http.get(Uri.parse('http://173.16.17.55:8080/api/auction/creator/$userId'));
+    if (userId.isEmpty) {
+      print("🚨 Lỗi: userId không hợp lệ!");
+      throw Exception("User ID không hợp lệ");
+    }
 
+    final response = await http.get(Uri.parse('http://192.168.1.30:8080/api/auction/creator/$userId'));
+
+    print("📢 API CALL: http://192.168.1.30:8080/api/auction/creator/$userId");
     print("📢 API RESPONSE STATUS: ${response.statusCode}");
     print("📢 API BODY: ${response.body}");
 
     if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      print("📢 JSON Result: ${data['result']}"); // ✅ In dữ liệu trả về trước khi parse
+      try {
+        final data = jsonDecode(response.body);
 
-      return (data['result'] as List).map((item) {
-        print("📢 Item Data: $item"); // ✅ In từng item trước khi parse
-        return AuctionItems.fromJson(item);
-      }).toList();
+        if (data.containsKey('result') && data['result'] is List) {
+          List<AuctionItems> auctions = (data['result'] as List).map((item) {
+            try {
+              return AuctionItems.fromJson(item);
+            } catch (e) {
+              print("🚨 Lỗi parse JSON cho item: $item, lỗi: $e");
+              return null;
+            }
+          }).whereType<AuctionItems>().toList(); // Loại bỏ null nếu parse thất bại
+
+          print("✅ Số đấu giá lấy được: ${auctions.length}");
+          return auctions;
+        } else {
+          print("🚨 API không trả về danh sách đấu giá hợp lệ!");
+          throw Exception("API Error: Không có danh sách đấu giá trong kết quả");
+        }
+      } catch (e) {
+        print("🚨 Lỗi giải mã JSON khi lấy đấu giá: $e");
+        throw Exception("JSON Decode Error: $e");
+      }
     } else {
       throw Exception("API Error: ${response.statusCode} - ${response.body}");
     }
   }
+
 
 
 

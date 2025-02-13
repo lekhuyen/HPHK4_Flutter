@@ -3,7 +3,9 @@ import 'package:fe/models/Auction_Items.dart';
 import 'package:fe/services/ApiAuction_ItemsService.dart';
 import 'package:intl/intl.dart';
 
+import '../services/ApiPaymentService.dart';
 import 'HomePage.dart';
+import 'PaymentWebView.dart';
 
 class Auction_ItemsDetailPage extends StatefulWidget {
   final AuctionItems item;
@@ -168,9 +170,34 @@ class _Auction_ItemsDetailPageState extends State<Auction_ItemsDetailPage> {
             ),
             const SizedBox(height: 8),
             OutlinedButton(
-              onPressed: () {},
-              child: const SizedBox(width: double.infinity, child: Center(child: Text("Payment"))),
+              onPressed: () async {
+                final apiPaymentService = ApiPaymentService();
+
+                String orderId = DateTime.now().millisecondsSinceEpoch.toString(); // ✅ Tạo orderId duy nhất
+                String productId = widget.item.itemId.toString(); // 🔥 Chuyển `int?` thành `String`
+
+                String? paymentUrl = await apiPaymentService.createPayment(
+                  productId, // ✅ Đảm bảo `productId` là `String`
+                  widget.item.startingPrice ?? 0, // Vẫn giữ `startingPrice` là `double`
+                  orderId,
+                );
+
+                if (paymentUrl != null) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => PaymentWebView(paymentUrl: paymentUrl)),
+                  );
+                } else {
+                  print("🚨 Lỗi tạo thanh toán VNPay!");
+                }
+              },
+              child: const SizedBox(
+                width: double.infinity,
+                child: Center(child: Text("Payment")),
+              ),
             ),
+
+
             const Divider(),
 
             /// Mô tả sản phẩm

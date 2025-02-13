@@ -23,7 +23,7 @@ class _MyAuctionPageState extends State<MyAuctionPage> with SingleTickerProvider
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
 
-    print("📢 userId truyền vào MyAuctionPage: ${widget.userId}"); // ✅ In userId để kiểm tra
+    print("📢 userId truyền vào MyAuctionPage: ${widget.userId}"); // ✅ Kiểm tra userId
 
     if (widget.userId.isEmpty) {
       print("🚨 Lỗi: Không có userId để tải dữ liệu!");
@@ -31,6 +31,8 @@ class _MyAuctionPageState extends State<MyAuctionPage> with SingleTickerProvider
       _fetchMyAuctions();
     }
   }
+
+
 
   Future<void> _fetchMyAuctions() async {
     try {
@@ -43,20 +45,13 @@ class _MyAuctionPageState extends State<MyAuctionPage> with SingleTickerProvider
 
       for (var auction in auctions) {
         if (auction.startDate != null && auction.endDate != null) {
-          if (auction.startDate!.isAfter(auction.endDate!)) {
-            print("🚨 LỖI: startDate (${auction.startDate}) > endDate (${auction.endDate})");
-            // ✅ Hoán đổi nếu bị lỗi
-            DateTime temp = auction.startDate!;
-            auction.startDate = auction.endDate;
-            auction.endDate = temp;
-            print("✅ Đã hoán đổi: startDate (${auction.startDate}) - endDate (${auction.endDate})");
-          }
-
           if (auction.endDate!.isAfter(now)) {
             ongoing.add(auction);
           } else {
             expired.add(auction);
           }
+        } else {
+          print("🚨 Lỗi: startDate hoặc endDate bị null cho đấu giá: ${auction.itemName}");
         }
       }
 
@@ -72,6 +67,7 @@ class _MyAuctionPageState extends State<MyAuctionPage> with SingleTickerProvider
       });
     }
   }
+
 
 
   @override
