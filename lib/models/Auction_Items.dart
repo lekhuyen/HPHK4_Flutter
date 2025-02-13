@@ -100,8 +100,6 @@
         endDate = null;
       }
 
-      // ✅ In ra để kiểm tra lỗi
-      print("📢 startDate: $startDate, endDate: $endDate");
 
 
       bidStep = json["bid_step"];
@@ -113,12 +111,10 @@
 
       // ✅ Kiểm tra createdAt và updatedAt trước khi parse
       if (json["createdAt"] != null) {
-        print("📢 createdAt: ${json["createdAt"]}");
         createdat = DateTime.tryParse(json["createdAt"].toString());
       }
 
       if (json["updatedAt"] != null) {
-        print("📢 updatedAt: ${json["updatedAt"]}");
         updatedat = DateTime.tryParse(json["updatedAt"].toString());
       }
 

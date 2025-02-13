@@ -1,7 +1,10 @@
 import 'dart:convert';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/User.dart';
+import '../pages/LoginPage.dart';
 
 class ApiUserService {
   static const String baseUrl = "http://192.168.1.30:8080/api/users";
@@ -33,7 +36,34 @@ class ApiUserService {
     print("📢 API LOGIN BODY: ${response.body}");
 
     if (response.statusCode == 200) {
-      return jsonDecode(response.body); // ✅ Decode JSON trước khi trả về
+      var responseData = jsonDecode(response.body);
+      if (responseData.containsKey('result')) {
+        var result = responseData['result'];
+
+        if (result.containsKey('userId') && result.containsKey('token')) {
+          String userId = result['userId'];
+          String token = result['token'];
+          String username = result['username'];
+
+          print("✅ Lưu thông tin đăng nhập:");
+          print("🆔 User ID: $userId");
+          print("🔑 Token: $token");
+          print("👤 Username: $username");
+
+          SharedPreferences prefs = await SharedPreferences.getInstance();
+          await prefs.setString('userId', userId);
+          await prefs.setString('token', token);
+          await prefs.setString('username', username);
+
+          return responseData;
+        } else {
+          print("🚨 Lỗi: userId hoặc token không có trong response!");
+          return null;
+        }
+      } else {
+        print("🚨 Lỗi: Response không chứa key 'result'!");
+        return null;
+      }
     } else {
       print("🚨 Lỗi đăng nhập: ${response.body}");
       return null;
@@ -42,8 +72,14 @@ class ApiUserService {
 
   // Đăng xuất người dùng
   Future<void> logoutUser() async {
+    print("🚨 Đang thực hiện logout!");
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.remove('username');
+    await prefs.remove('userId');
+    await prefs.remove('token');
+
+    print("📢 Đã xóa dữ liệu đăng nhập!");
+
   }
 
 
