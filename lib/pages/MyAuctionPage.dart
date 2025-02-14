@@ -67,6 +67,7 @@ class _MyAuctionPageState extends State<MyAuctionPage> with SingleTickerProvider
             expired.add(auction);
           }
         } else {
+
           print("🚨 Lỗi: startDate hoặc endDate bị null cho đấu giá: ${auction.itemName}");
         }
       }
@@ -155,8 +156,8 @@ class _MyAuctionPageState extends State<MyAuctionPage> with SingleTickerProvider
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text("Start Date: $startDate", style: const TextStyle(color: Colors.blue)), // ✅ Hiển thị ngày bắt đầu
-            Text("End Date: $endDate", style: const TextStyle(color: Colors.red)), // ✅ Hiển thị ngày kết thúc
+            Text("End Date: $startDate", style: const TextStyle(color: Colors.blue)), // ✅ Hiển thị ngày bắt đầu
+            Text("Start Date: $endDate", style: const TextStyle(color: Colors.red)), // ✅ Hiển thị ngày kết thúc
             Text(price, style: const TextStyle(fontWeight: FontWeight.bold)),
           ],
         ),

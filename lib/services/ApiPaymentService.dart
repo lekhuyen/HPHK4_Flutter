@@ -15,7 +15,6 @@ class ApiPaymentService {
       print("🚨 Lỗi: Không tìm thấy token! Người dùng chưa đăng nhập?");
       return null;
     }
-
     final url = Uri.parse("$_baseUrl/api/v1/payment/vn-pay").replace(queryParameters: {
       "productId": productId,
       "amount": amount.toString(),
@@ -29,13 +28,10 @@ class ApiPaymentService {
         "Content-Type": "application/json"
       },
     );
-
     print("📢 API PAYMENT STATUS: ${response.statusCode}");
     print("📢 API PAYMENT BODY: ${response.body}");
-
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
-
       // ✅ Sửa lỗi lấy `paymentUrl` từ `data` thay vì `result`
       if (data.containsKey("data") && data["data"].containsKey("paymentUrl")) {
         String paymentUrl = data["data"]["paymentUrl"];
@@ -61,7 +57,7 @@ class ApiPaymentService {
       return null;
     }
 
-    final url = Uri.parse("http://192.168.1.30:8080/api/v1/payment/bids/$userId"); // 🛠 Sửa URL
+    final url = Uri.parse("http://192.168.1.30:8080/api/v1/payment/bids/$userId");
 
     try {
       final response = await http.get(
@@ -78,7 +74,7 @@ class ApiPaymentService {
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
 
-        // 🛠 Kiểm tra xem JSON có chứa "paid" và "unpaid" không
+        // 🔥 Kiểm tra key JSON để tránh lỗi
         if (!data.containsKey("paid") || !data.containsKey("unpaid")) {
           print("🚨 API trả về dữ liệu không đúng định dạng!");
           return null;
@@ -102,6 +98,7 @@ class ApiPaymentService {
       return null;
     }
   }
+
 
 }
 

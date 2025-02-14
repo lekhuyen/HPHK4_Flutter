@@ -6,6 +6,7 @@ import '../models/User.dart';
 import '../services/ApiUserService.dart';
 import 'CreateAuctionItemsPage.dart';
 import 'MyAuctionPage.dart';
+import 'MyBidsPage.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -13,6 +14,7 @@ class LoginPage extends StatefulWidget {
   _LoginPageState createState() => _LoginPageState();
 }
 class _LoginPageState extends State<LoginPage> {
+
   Future<void> _navigateToMyAuctions() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? userId = prefs.getString('userId'); // Giả sử bạn đã lưu userId vào SharedPreferences
@@ -37,17 +39,47 @@ class _LoginPageState extends State<LoginPage> {
     _loadUserData(); // Gọi hàm kiểm tra dữ liệu đăng nhập
   }
 
+
+
+  Future<void> _loginUser(String email, String password) async {
+    var response = await _apiUserService.loginUser(email, password);
+
+    if (response != null && response.containsKey('result')) {
+      var result = response['result'];
+
+      if (result != null && result.containsKey('userId') && result.containsKey('token')) {
+        String userId = result['userId'];
+        String token = result['token'];
+
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setString('userId', userId);
+        await prefs.setString('token', token);
+
+        print("✅ Login thành công, chuyển về MyBidsPage!");
+
+        // 🔥 Chuyển về MyBidsPage sau khi đăng nhập
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const MyBidsPage()),
+        );
+      } else {
+        print("🚨 Lỗi: userId hoặc token không có trong kết quả!");
+      }
+    } else {
+      print("🚨 Lỗi đăng nhập: API trả về dữ liệu không hợp lệ!");
+    }
+  }
+
+
   Future<void> _loadUserData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? username = prefs.getString('username');
     String? userId = prefs.getString('userId');
     String? token = prefs.getString('token');
-
     print("📢 Kiểm tra dữ liệu đăng nhập:");
     print("👤 Username: $username");
     print("🆔 UserId: $userId");
     print("🔑 Token: $token");
-
     if (username != null && userId != null && token != null) {
       setState(() {
         _username = username;
@@ -56,28 +88,21 @@ class _LoginPageState extends State<LoginPage> {
       print("🚨 Không tìm thấy thông tin đăng nhập!");
     }
   }
-
   Future<void> _loadUsername() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
       _username = prefs.getString('username');
     });
   }
-
-
-
   Future<void> _logout() async {
     print("🚨 Đang thực hiện logout!");
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.clear();
     print("📢 Đã xóa dữ liệu đăng nhập!");
-
     // Cập nhật lại UI
     _username = null;
     setState(() {});
   }
-
-
  void _showSignUpDialog(BuildContext context) {
     final TextEditingController usernameController = TextEditingController();
     final TextEditingController emailController = TextEditingController();
@@ -222,7 +247,7 @@ class _LoginPageState extends State<LoginPage> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     const Text("Log In", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                    IconButton(icon: const Icon(Icons.close), onPressed: () => Navigator.pop(context)),
+                    IconButton(icon: const Icon(Icons.close), onPressed: (  ) => Navigator.pop(context)),
                   ],
                 ),
                 const SizedBox(height: 15),

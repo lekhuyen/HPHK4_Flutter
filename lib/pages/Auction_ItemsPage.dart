@@ -23,7 +23,11 @@ class _Auction_ItemsPageState extends State<Auction_ItemsPage> {
   void initState() {
     super.initState();
     futureAuctionItems = apiService.getAllAuctionItems();
+
   }
+
+
+
   Widget buildAuctionItemCard(AuctionItems item) {
     String imageUrl = item.images?.isNotEmpty ?? false ? item.images!.first : 'https://via.placeholder.com/150';
 

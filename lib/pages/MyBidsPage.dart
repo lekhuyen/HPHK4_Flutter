@@ -1,6 +1,10 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/Auction_Items.dart';
 import '../services/ApiPaymentService.dart';
+import 'LoginPage.dart';
+import 'package:http/http.dart' as http;
 
 class MyBidsPage extends StatefulWidget {
   const MyBidsPage({super.key});
@@ -15,50 +19,62 @@ class _MyBidsPageState extends State<MyBidsPage> with SingleTickerProviderStateM
   List<AuctionItems> paidItems = [];
   List<AuctionItems> unpaidItems = [];
   bool isLoading = true;
+  String? userId;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
-    fetchUserBids();
-_buildPaidTab(paidItems);
+    _checkLoginStatus();
+  }
+
+  Future<void> _checkLoginStatus() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? storedUserId = prefs.getString('userId');
+
+    setState(() {
+      userId = storedUserId;
+    });
+
+    if (userId != null) {
+      fetchUserBids();
+    } else {
+      setState(() {
+        isLoading = false;
+      });
+    }
   }
 
   Future<void> fetchUserBids() async {
-    var bids = await _apiPaymentService.getUserBids();
-    if (bids != null) {
-      print("✅ Bids Loaded Successfully!");
-      setState(() {
-        paidItems = bids["paid"] ?? [];
-        unpaidItems = bids["unpaid"] ?? [];
-      });
-    } else {
-      print("🚨 Lỗi tải dữ liệu đấu giá!");
-    }
-  }
+    if (userId == null) return;
 
-
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
-  }
-  Widget _buildPaidTab(List<AuctionItems> paidItems) {
-    if (paidItems.isEmpty) {
-      return const Center(child: Text("No paid items found"));
-    }
-
-    return ListView.builder(
-      itemCount: paidItems.length,
-      itemBuilder: (context, index) {
-        var item = paidItems[index];
-
-        return ListTile(
-          title: Text(item.itemName ?? 'Unknown Item'),
-          trailing: const Text("Paid", style: TextStyle(color: Colors.green)),
-        );
-      },
+    final response = await http.get(
+      Uri.parse("http://192.168.1.30:8080/api/v1/payment/bids/$userId"),
+      headers: {"Content-Type": "application/json"},
     );
+
+    print("📢 API BID STATUS: ${response.statusCode}");
+    print("📢 API BID BODY: ${response.body}");
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+
+      setState(() {
+        paidItems = (data["paid"] as List).map((e) => AuctionItems.fromJson(e)).toList();
+        unpaidItems = (data["unpaid"] as List).map((e) => AuctionItems.fromJson(e)).toList();
+        isLoading = false;
+      });
+
+      print("✅ Số lượng sản phẩm đã thanh toán: ${paidItems.length}");
+      print("✅ Số lượng sản phẩm chưa thanh toán: ${unpaidItems.length}");
+    } else {
+      print("🚨 Lỗi tải danh sách đấu giá!");
+      setState(() {
+        isLoading = false;
+      });
+    }
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -79,11 +95,49 @@ _buildPaidTab(paidItems);
       ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
-          : TabBarView(
-        controller: _tabController,
+          : Column(
         children: [
-          _buildBidList(paidItems, "No paid items"),
-          _buildBidList(unpaidItems, "No unpaid items"),
+          if (userId == null) _buildLoginPrompt(), // ✅ Hiển thị đăng nhập trên cùng
+          Expanded(
+            child: TabBarView(
+              controller: _tabController,
+              children: [
+                _buildBidList(paidItems, "No paid items"),
+                _buildBidList(unpaidItems, "No unpaid items"),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// ✅ Widget thông báo yêu cầu đăng nhập
+  Widget _buildLoginPrompt() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      color: Colors.grey[200],
+      child: Column(
+        children: [
+          const Text(
+            "Log in to save items, follow searches, place bids, and register for auctions.",
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 16, color: Colors.black54),
+          ),
+          const SizedBox(height: 10),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const LoginPage()),
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.teal,
+              padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
+            ),
+            child: const Text("LOG IN", style: TextStyle(fontSize: 16, color: Colors.white)),
+          ),
         ],
       ),
     );
@@ -91,7 +145,12 @@ _buildPaidTab(paidItems);
 
   Widget _buildBidList(List<AuctionItems> items, String emptyText) {
     return items.isEmpty
-        ? Center(child: Text(emptyText, style: const TextStyle(fontSize: 16, color: Colors.black54)))
+        ? Column(
+      children: [
+        const SizedBox(height: 16),
+        Text(emptyText, style: const TextStyle(fontSize: 16, color: Colors.black54)),
+      ],
+    )
         : ListView.builder(
       padding: const EdgeInsets.all(16.0),
       itemCount: items.length,
@@ -107,8 +166,8 @@ _buildPaidTab(paidItems);
             title: Text(item.itemName ?? "No Name"),
             subtitle: Text("Price: \$${item.startingPrice ?? 0}"),
             trailing: Text(
-              (item.issoldout ?? false) ? "Paid" : "Unpaid",
-              style: TextStyle(color: (item.issoldout ?? false) ? Colors.green : Colors.red),
+              (item.ispaid ?? false) ? "Paid ✅" : "Unpaid ❌",
+              style: TextStyle(color: (item.ispaid ?? false) ? Colors.green : Colors.red),
             ),
           ),
         );

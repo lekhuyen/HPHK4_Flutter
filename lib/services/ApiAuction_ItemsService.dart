@@ -137,6 +137,7 @@ class ApiAuction_ItemsService {
       throw Exception("Failed to load upcoming auctions");
     }
   }
+
   Future<List<AuctionItems>> getItemsByCategory(String categoryId) async {
     try {
       final response = await http.get(Uri.parse('$urlAuctionItems/category/$categoryId?size=100'));
@@ -152,6 +153,7 @@ class ApiAuction_ItemsService {
           }
         }
         print("✅ Fetched ${list.length} items from category $categoryId");
+
         return list;
       } else {
         throw Exception('Failed to load items by category');
