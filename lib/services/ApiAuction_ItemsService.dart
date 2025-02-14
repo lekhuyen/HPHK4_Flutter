@@ -192,11 +192,8 @@ class ApiAuction_ItemsService {
     }
 
     final response = await http.get(Uri.parse('http://192.168.1.30:8080/api/auction/creator/$userId'));
-
     print("📢 API CALL: http://192.168.1.30:8080/api/auction/creator/$userId");
     print("📢 API RESPONSE STATUS: ${response.statusCode}");
-
-
     if (response.statusCode == 200) {
       try {
         final data = jsonDecode(response.body);

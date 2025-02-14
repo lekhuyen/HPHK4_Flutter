@@ -28,7 +28,7 @@ class _PaymentWebViewState extends State<PaymentWebView> {
           onPageFinished: (String url) {
             if (url.contains("vnp_ResponseCode=00")) {
               print("✅ Thanh toán thành công, gọi API callback...");
-              _apiPaymentService.handlePaymentCallback(widget.productId).then((_) {
+              _apiPaymentService.getUserBids().then((_) {
                 // ✅ Sau khi gọi callback, chuyển về trang MyBidsPage
                 Navigator.pushAndRemoveUntil(
                   context,

@@ -9,7 +9,6 @@ import '../pages/LoginPage.dart';
 class ApiUserService {
   static const String baseUrl = "http://192.168.1.30:8080/api/users";
   static const String loginUrl = "http://192.168.1.30:8080/api/auth";
-
   Future<bool> registerUser(User user) async {
     try {
       final response = await http.post(
@@ -31,30 +30,24 @@ class ApiUserService {
       headers: {"Content-Type": "application/json"},
       body: jsonEncode({"email": email, "password": password}),
     );
-
     print("📢 API LOGIN STATUS: ${response.statusCode}");
     print("📢 API LOGIN BODY: ${response.body}");
-
     if (response.statusCode == 200) {
       var responseData = jsonDecode(response.body);
       if (responseData.containsKey('result')) {
         var result = responseData['result'];
-
         if (result.containsKey('userId') && result.containsKey('token')) {
           String userId = result['userId'];
           String token = result['token'];
           String username = result['username'];
-
           print("✅ Lưu thông tin đăng nhập:");
           print("🆔 User ID: $userId");
           print("🔑 Token: $token");
           print("👤 Username: $username");
-
           SharedPreferences prefs = await SharedPreferences.getInstance();
           await prefs.setString('userId', userId);
           await prefs.setString('token', token);
           await prefs.setString('username', username);
-
           return responseData;
         } else {
           print("🚨 Lỗi: userId hoặc token không có trong response!");
@@ -69,7 +62,6 @@ class ApiUserService {
       return null;
     }
   }
-
   // Đăng xuất người dùng
   Future<void> logoutUser() async {
     print("🚨 Đang thực hiện logout!");

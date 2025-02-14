@@ -17,6 +17,7 @@
     DateTime? createdat;
     DateTime? updatedat;
     List<String>? images;
+    bool? paid; // ✅ Thêm trường paid để kiểm tra đã thanh toán hay chưa
 
     // Add categoryId and categoryName as separate fields
     int? categoryId;
@@ -26,6 +27,8 @@
     Category? category;
 
     AuctionItems({
+      this.paid, // ✅ Thêm vào constructor
+
       this.itemId,
       this.itemName,
       this.description,
@@ -49,6 +52,8 @@
 
     Map<String, dynamic> toJson() {
       final map = <String, dynamic>{};
+      map["ispaid"] = paid; // ✅ Thêm vào JSON serialization
+
       map["item_id"] = itemId;
       map["item_name"] = itemName;
       map["description"] = description;
@@ -73,7 +78,7 @@
       // Convert category object to JSON (if it's available)
       if (category != null) {
         map["category"] = category?.toJson();
-      }
+       }
 
       return map;
     }
@@ -84,23 +89,26 @@
       itemName = json["item_name"];
       description = json["description"];
       startingPrice = json["starting_price"];
-      currentPrice = json["current_price"];
+      currentPrice = json["current_price"] != null
+          ? double.tryParse(json["current_price"].toString()) // ✅ Chuyển E notation thành double
+          : null;
 
-      // ✅ Chuyển đổi start_date từ List<int> thành DateTime
-      if (json["start_date"] is List && json["start_date"].length == 3) {
-        startDate = DateTime(json["start_date"][0], json["start_date"][1], json["start_date"][2]);
+      if (json["start_date"] is String) {
+        startDate = DateTime.parse(json["start_date"]);  // ✅ Chuyển đổi String thành DateTime
       } else {
         startDate = null;
       }
 
-      // ✅ Chuyển đổi end_date từ List<int> thành DateTime
-      if (json["end_date"] is List && json["end_date"].length == 3) {
-        endDate = DateTime(json["end_date"][0], json["end_date"][1], json["end_date"][2]);
+      if (json["end_date"] is String) {
+        endDate = DateTime.parse(json["end_date"]);
       } else {
         endDate = null;
       }
+
       bidStep = json["bid_step"];
       issell = json["sell"];
+      paid = json["paid"] ?? false; // ✅ Đọc giá trị paid từ API
+
       status = json["status"];
       issoldout = json["soldout"];
       width = json["width"];
