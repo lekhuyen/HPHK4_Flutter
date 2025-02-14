@@ -47,5 +47,35 @@ class ApiPaymentService {
       print("🚨 Lỗi tạo thanh toán: ${response.body}");
       return null;
     }
+  }/// 🟢 Gọi API callback sau khi thanh toán thành công
+  Future<void> handlePaymentCallback(String productId) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('token'); // ✅ Lấy token từ SharedPreferences
+
+    if (token == null) {
+      print("🚨 Lỗi: Không tìm thấy token! Người dùng chưa đăng nhập?");
+      return;
+    }
+
+    final callbackUrl = Uri.parse("$_baseUrl/api/v1/payment/vn-pay-callback").replace(queryParameters: {
+      "productId": productId,
+    });
+
+    final response = await http.get(
+      callbackUrl,
+      headers: {
+        "Authorization": "Bearer $token",
+        "Content-Type": "application/json"
+      },
+    );
+
+    print("📢 API CALLBACK STATUS: ${response.statusCode}");
+    print("📢 API CALLBACK BODY: ${response.body}");
+
+    if (response.statusCode == 200) {
+      print("✅ Callback thanh toán thành công, cập nhật MyBidsPage!");
+    } else {
+      print("🚨 Lỗi callback thanh toán: ${response.body}");
+    }
   }
 }

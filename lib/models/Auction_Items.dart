@@ -99,9 +99,6 @@
       } else {
         endDate = null;
       }
-
-
-
       bidStep = json["bid_step"];
       issell = json["sell"];
       status = json["status"];

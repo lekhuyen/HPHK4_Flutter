@@ -185,7 +185,7 @@ class _Auction_ItemsDetailPageState extends State<Auction_ItemsDetailPage> {
                 if (paymentUrl != null) {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => PaymentWebView(paymentUrl: paymentUrl)),
+                    MaterialPageRoute(builder: (context) => PaymentWebView(paymentUrl: paymentUrl, productId: '',)),
                   );
                 } else {
                   print("🚨 Lỗi tạo thanh toán VNPay!");
