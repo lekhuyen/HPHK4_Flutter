@@ -20,6 +20,7 @@ class AuctionItems {
   List<String>? images;
   String? sellerId; // Ensure this field exists
   bool? paid; // 🔥 Đảm bảo có trường paid
+  String? buyerName; // ✅ Thêm tên người mua
 
   // Add categoryId and categoryName as separate fields
   int? categoryId;
@@ -29,6 +30,7 @@ class AuctionItems {
   Category? category;
 
   AuctionItems({
+    this.buyerName, // ✅ Thêm vào constructor
 
     this.paid,
     this.itemId,
@@ -74,7 +76,7 @@ class AuctionItems {
     map["updatedAt"] = updatedat?.toIso8601String();
     map["images"] = images;
     map["userId"] = sellerId;
-
+    map["buyerName"] = buyerName;
     // Include categoryId and categoryName in the JSON serialization
     map["category_id"] = categoryId;
     map["category_name"] = categoryName;
@@ -83,7 +85,6 @@ class AuctionItems {
     if (category != null) {
       map["category"] = category?.toJson();
     }
-
     return map;
   }
 
@@ -95,6 +96,8 @@ class AuctionItems {
     startingPrice = json["starting_price"];
     currentPrice = json["current_price"];
     ispaid = json["paid"] ?? false; // ✅ Nếu null thì mặc định false
+    buyerName = json["buyer"] != null ? json["buyer"]["name"] : "Unknown Buyer"; // ✅ Lấy tên buyer
+
     // ✅ Chuyển đổi start_date từ List<int> thành DateTime
     if (json["start_date"] is List && json["start_date"].length == 3) {
       startDate = DateTime(json["start_date"][0], json["start_date"][1], json["start_date"][2]);

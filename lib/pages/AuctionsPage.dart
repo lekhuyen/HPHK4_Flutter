@@ -115,6 +115,7 @@ class _AuctionsPageState extends State<AuctionsPage> with SingleTickerProviderSt
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(item.description ?? "No Description", style: const TextStyle(color: Colors.black)),
+
                     Text("Start: ${item.startDate}", style: const TextStyle(color: Colors.black)),
                     Text("End: ${item.endDate}", style: const TextStyle(color: Colors.black)),
                   ],

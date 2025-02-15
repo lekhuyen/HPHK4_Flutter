@@ -1,3 +1,4 @@
+import 'package:fe/pages/MyBidsPage.dart';
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import '../services/ApiPaymentService.dart';
@@ -6,9 +7,7 @@ import 'HomePage.dart';
 class PaymentWebView extends StatefulWidget {
   final String paymentUrl;
   final String productId; // ✅ Thêm productId để gọi API callback
-
   const PaymentWebView({super.key, required this.paymentUrl, required this.productId});
-
   @override
   State<PaymentWebView> createState() => _PaymentWebViewState();
 }
@@ -29,14 +28,14 @@ class _PaymentWebViewState extends State<PaymentWebView> {
             if (url.contains("vnp_ResponseCode=00")) {
               print("✅ Thanh toán thành công, gọi API callback...");
               _apiPaymentService.getUserBids().then((_) {
-                // ✅ Sau khi gọi callback, chuyển về trang MyBidsPage
                 Navigator.pushAndRemoveUntil(
                   context,
-                  MaterialPageRoute(builder: (context) => const Homepage(initialIndex: 3)), // Chuyển về MyBidsPage
-                      (route) => false, // Xóa toàn bộ các trang trước đó khỏi stack
+                  MaterialPageRoute(builder: (context) => const MyBidsPage()),
+                      (route) => false, // Xóa toàn bộ các trang trước đó
                 );
               });
             }
+
           },
         ),
       )

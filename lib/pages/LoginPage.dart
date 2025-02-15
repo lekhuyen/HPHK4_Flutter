@@ -7,6 +7,7 @@ import '../services/ApiUserService.dart';
 import 'CreateAuctionItemsPage.dart';
 import 'MyAuctionPage.dart';
 import 'MyBidsPage.dart';
+import 'WonItemsPage.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -38,8 +39,6 @@ class _LoginPageState extends State<LoginPage> {
     _loadUsername();
     _loadUserData(); // Gọi hàm kiểm tra dữ liệu đăng nhập
   }
-
-
 
   Future<void> _loginUser(String email, String password) async {
     var response = await _apiUserService.loginUser(email, password);
@@ -426,7 +425,13 @@ class _LoginPageState extends State<LoginPage> {
                     MaterialPageRoute(builder: (context) => const CreateAuctionItemsPage()),
                   );
                 }),
-                _buildListTile("Won Items", () {}),
+                _buildListTile("Won Items", () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const WonItemsPage()), // ✅ Chuyển đến trang Won Items
+                  );
+                }),
+
                 _buildListTile("Notifications", () {}),
                 _buildListTile("Message", () {}),
                 _buildListTile("Device Settings", () {}),

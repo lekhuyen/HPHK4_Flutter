@@ -34,7 +34,7 @@ class _CategoryItemPageState extends State<CategoryItemPage> {
     return Scaffold(
       backgroundColor: Colors.white,  // Set background color of the whole page to white
       appBar: AppBar(
-        title: const Text('Categories'),
+        title: const Text('LIVEACCTIONEERS'),
         backgroundColor: Colors.white,
         centerTitle: true,
         bottom: PreferredSize(

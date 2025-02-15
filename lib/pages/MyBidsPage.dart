@@ -164,7 +164,13 @@ class _MyBidsPageState extends State<MyBidsPage> with SingleTickerProviderStateM
                 ? Image.network(item.images!.first, width: 50, height: 50, fit: BoxFit.cover)
                 : const Icon(Icons.image, size: 50),
             title: Text(item.itemName ?? "No Name"),
-            subtitle: Text("Price: \$${item.startingPrice ?? 0}"),
+            subtitle: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text("Price: \$${item.startingPrice ?? 0}"),
+                if (item.ispaid ?? false) Text("Buyer: ${item.buyerName}", style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)), // ✅ Hiển thị tên người thanh toán
+              ],
+            ),
             trailing: Text(
               (item.ispaid ?? false) ? "Paid ✅" : "Unpaid ❌",
               style: TextStyle(color: (item.ispaid ?? false) ? Colors.green : Colors.red),
@@ -174,4 +180,5 @@ class _MyBidsPageState extends State<MyBidsPage> with SingleTickerProviderStateM
       },
     );
   }
+
 }

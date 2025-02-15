@@ -99,6 +99,56 @@ class ApiPaymentService {
     }
   }
 
+  Future<List<AuctionItems>> getWonItemsByUser() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? userId = prefs.getString('userId');
+    String? token = prefs.getString('token');
+
+    if (userId == null || token == null) {
+      print("🚨 Không tìm thấy userId hoặc token!");
+      return [];
+    }
+
+    final url = Uri.parse("http://192.168.1.30:8080/api/v1/payment/won-items/$userId");
+
+    try {
+      final response = await http.get(
+        url,
+        headers: {
+          "Authorization": "Bearer $token",
+          "Content-Type": "application/json"
+        },
+      );
+
+      print("📢 API WON ITEMS STATUS: ${response.statusCode}");
+      print("📢 API WON ITEMS BODY: ${response.body}");
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+
+        if (data.containsKey("data")) {
+          List<dynamic> rawItems = data["data"];
+
+          // 🔥 Bỏ dữ liệu buyer.auctionItems nếu tồn tại
+          List<AuctionItems> wonItems = rawItems.map((e) {
+            if (e.containsKey("buyer") && e["buyer"] is Map) {
+              e["buyer"].remove("auctionItems"); // ✅ Xóa dữ liệu lỗi
+            }
+            return AuctionItems.fromJson(e);
+          }).toList();
+
+          return wonItems;
+        }
+      }
+
+      print("🚨 Lỗi lấy danh sách sản phẩm đã thanh toán: ${response.body}");
+      return [];
+    } catch (e) {
+      print("🚨 Exception khi gọi API: $e");
+      return [];
+    }
+  }
+
 
 }
 

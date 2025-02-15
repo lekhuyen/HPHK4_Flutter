@@ -3,6 +3,7 @@ import 'package:fe/models/Auction_Items.dart';
 import 'package:fe/services/ApiAuction_ItemsService.dart';
 import 'package:intl/intl.dart';
 
+import '../services/ApiBiddingService.dart';
 import '../services/ApiPaymentService.dart';
 import 'HomePage.dart';
 import 'PaymentWebView.dart';
@@ -18,16 +19,57 @@ class _Auction_ItemsDetailPageState extends State<Auction_ItemsDetailPage> {
   late ApiAuction_ItemsService apiService;
   List<AuctionItems> similarItems = [];
   bool isLoadingSimilarItems = true;
+  late TextEditingController _bidController; // ✅ Ô nhập giá đấu
+  bool isPlacingBid = false; // Trạng thái loading khi đặt giá
+
 
   @override
   void initState() {
     super.initState();
     apiService = ApiAuction_ItemsService();
+    _bidController = TextEditingController();
+
     fetchSimilarItems();
     fetchUpcomingItems();
   }
   List<AuctionItems> upcomingItems = [];
   bool isLoadingUpcomingItems = true;
+
+  @override
+  void dispose() {
+    _bidController.dispose();
+    super.dispose();
+  }
+
+  Future<void> placeBid() async {
+    double? bidAmount = double.tryParse(_bidController.text);
+    if (bidAmount == null || bidAmount <= 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("🚨 Please enter a valid bid amount")),
+      );
+      return;
+    }
+
+    setState(() {
+      isPlacingBid = true;
+      widget.item.startingPrice = bidAmount; // 🔥 Cập nhật giá đấu ngay lập tức
+    });
+
+    bool success = await ApiBiddingService().placeBid(widget.item.itemId!, bidAmount);
+    setState(() => isPlacingBid = false);
+
+    if (success) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("🎉 Bid placed successfully for \$${bidAmount.toStringAsFixed(2)}!")),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("🚨 Failed to place bid. Please try again.")),
+      );
+    }
+  }
+
+
   /// Gọi API để lấy danh sách sản phẩm sắp tới
   Future<void> fetchUpcomingItems() async {
     try {
@@ -115,7 +157,6 @@ class _Auction_ItemsDetailPageState extends State<Auction_ItemsDetailPage> {
         ),
       ),
 
-
       body: SingleChildScrollView(
         physics: const BouncingScrollPhysics(),
         padding: const EdgeInsets.all(16.0),
@@ -156,18 +197,28 @@ class _Auction_ItemsDetailPageState extends State<Auction_ItemsDetailPage> {
             ),
             const SizedBox(height: 16),
 
+            /// Ô nhập giá đấu giá
+            TextField(
+              controller: _bidController,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                labelText: "Enter your bid",
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 16),
+
             /// Nút đặt giá
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Bid placed for ${widget.item.itemName}')),
-                  );
-                },
-                child: const Text('PLACE BID'),
+                onPressed: isPlacingBid ? null : placeBid,
+                child: isPlacingBid
+                    ? const CircularProgressIndicator()
+                    : const Text("PLACE BID"),
               ),
             ),
+
             const SizedBox(height: 8),
             OutlinedButton(
               onPressed: () async {
