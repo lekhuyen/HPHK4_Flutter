@@ -9,7 +9,7 @@ import 'HomePage.dart';
 import 'PaymentWebView.dart';
 
 class Auction_ItemsDetailPage extends StatefulWidget {
-  final AuctionItems item;
+   final AuctionItems item;
   const Auction_ItemsDetailPage({super.key, required this.item});
   @override
   _Auction_ItemsDetailPageState createState() => _Auction_ItemsDetailPageState();
@@ -21,6 +21,7 @@ class _Auction_ItemsDetailPageState extends State<Auction_ItemsDetailPage> {
   bool isLoadingSimilarItems = true;
   late TextEditingController _bidController; // ✅ Ô nhập giá đấu
   bool isPlacingBid = false; // Trạng thái loading khi đặt giá
+  AuctionItems? updatedItem; // 🔥 Biến giữ dữ liệu mới
 
 
   @override
@@ -28,10 +29,18 @@ class _Auction_ItemsDetailPageState extends State<Auction_ItemsDetailPage> {
     super.initState();
     apiService = ApiAuction_ItemsService();
     _bidController = TextEditingController();
+    fetchItemDetails(); // 🔥 Gọi API để lấy giá mới nhất
+
+    ApiBiddingService biddingService = ApiBiddingService();
+    biddingService.onNewBidReceived = (double newPrice) {
+      print("🔄 WebSocket received new price: $newPrice"); // 🔥 Debug giá mới từ WebSocket
+      fetchItemDetails(); // 🔥 Thay vì chỉ cập nhật giá, gọi lại API
+    };
 
     fetchSimilarItems();
     fetchUpcomingItems();
   }
+
   List<AuctionItems> upcomingItems = [];
   bool isLoadingUpcomingItems = true;
 
@@ -40,6 +49,26 @@ class _Auction_ItemsDetailPageState extends State<Auction_ItemsDetailPage> {
     _bidController.dispose();
     super.dispose();
   }
+
+
+  // 🔥 Hàm mới để cập nhật dữ liệu từ API
+  Future<void> fetchItemDetails() async {
+    try {
+      var newItem = await apiService.getItemById(widget.item.itemId!);
+
+      print("✅ Loaded item details: ${newItem.toJson()}"); // 🔥 Debug toàn bộ dữ liệu từ API
+
+      setState(() {
+        updatedItem = newItem;
+      });
+
+      print("✅ Updated item price: ${updatedItem?.startingPrice}"); // 🔥 Kiểm tra giá sau cập nhật
+    } catch (e) {
+      print("🚨 Lỗi khi tải sản phẩm mới: $e");
+    }
+  }
+
+
 
   Future<void> placeBid() async {
     double? bidAmount = double.tryParse(_bidController.text);
@@ -50,10 +79,7 @@ class _Auction_ItemsDetailPageState extends State<Auction_ItemsDetailPage> {
       return;
     }
 
-    setState(() {
-      isPlacingBid = true;
-      widget.item.startingPrice = bidAmount; // 🔥 Cập nhật giá đấu ngay lập tức
-    });
+    setState(() => isPlacingBid = true);
 
     bool success = await ApiBiddingService().placeBid(widget.item.itemId!, bidAmount);
     setState(() => isPlacingBid = false);
@@ -62,12 +88,17 @@ class _Auction_ItemsDetailPageState extends State<Auction_ItemsDetailPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("🎉 Bid placed successfully for \$${bidAmount.toStringAsFixed(2)}!")),
       );
+
+      fetchItemDetails(); // 🔥 Gọi lại API để lấy giá mới nhất
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("🚨 Failed to place bid. Please try again.")),
       );
     }
   }
+
+
+
 
 
   /// Gọi API để lấy danh sách sản phẩm sắp tới
@@ -135,6 +166,8 @@ class _Auction_ItemsDetailPageState extends State<Auction_ItemsDetailPage> {
 
   @override
   Widget build(BuildContext context) {
+    final item = updatedItem ?? widget.item; // 🔥 Sử dụng giá mới nếu có
+
     String imageUrl = (widget.item.images != null && widget.item.images!.isNotEmpty)
         ? widget.item.images!.first
         : 'https://via.placeholder.com/150';
@@ -189,7 +222,7 @@ class _Auction_ItemsDetailPageState extends State<Auction_ItemsDetailPage> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    Text('Price: \$${widget.item.startingPrice ?? 0}', style: const TextStyle(fontSize: 18)),
+                    Text('Price: \$${item.startingPrice ?? 0}', style: const TextStyle(fontSize: 18)),
                     Text('Time Left: $timeLeft', style: const TextStyle(fontSize: 16, color: Colors.red)),
                   ],
                 ),

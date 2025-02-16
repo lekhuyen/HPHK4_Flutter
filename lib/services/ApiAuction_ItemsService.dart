@@ -225,9 +225,25 @@ class ApiAuction_ItemsService {
     }
   }
 
+  Future<AuctionItems> getItemById(int itemId) async {
+    final response = await http.get(Uri.parse("$urlAuctionItems/$itemId"));
 
+    print("📡 API Response: ${response.body}"); // 🔥 Debug phản hồi API
 
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
 
+      double startingPrice = (data['current_price'] != null && data['current_price'] > 0)
+          ? data['current_price']
+          : (data['startingPrice'] ?? 0); // ✅ Ưu tiên giá hiện tại nếu có
+
+      print("✅ API returned price: $startingPrice"); // 🔥 Kiểm tra giá
+
+      return AuctionItems.fromJson({...data, 'startingPrice': startingPrice});
+    } else {
+      throw Exception("Failed to load auction item");
+    }
+  }
 
 
 

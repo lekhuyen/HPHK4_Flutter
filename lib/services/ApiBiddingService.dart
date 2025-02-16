@@ -5,8 +5,9 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiBiddingService {
-  final String apiUrl = "http://192.168.1.30:8080/api/bidding";
+  final String apiUrl = "http://10.130.53.23:8080/api/bidding";
   late StompClient stompClient;
+  Function(double)? onNewBidReceived; // 🔥 Callback để cập nhật UI
 
   ApiBiddingService() {
     _connectWebSocket();
@@ -15,7 +16,7 @@ class ApiBiddingService {
   void _connectWebSocket() {
     stompClient = StompClient(
       config: StompConfig(
-        url: 'ws://192.168.1.30:8080/ws', // 🔥 Đổi từ HTTP sang WS
+        url: 'ws://192.168.1.30:8080/ws',
         onConnect: (StompFrame frame) {
           print("✅ Connected to WebSocket");
 
@@ -24,7 +25,14 @@ class ApiBiddingService {
             callback: (StompFrame frame) {
               if (frame.body != null) {
                 var response = jsonDecode(frame.body!);
-                print("🔔 New Bid Received: $response");
+                double newPrice = response['bidAmount'];
+
+                print("🔔 New Bid Received: \$$newPrice");
+
+                // 🔥 Gọi callback để cập nhật UI ngay lập tức
+                if (onNewBidReceived != null) {
+                  onNewBidReceived!(newPrice);
+                }
               }
             },
           );
@@ -34,7 +42,6 @@ class ApiBiddingService {
     );
     stompClient.activate();
   }
-
 
   Future<bool> placeBid(int itemId, double bidAmount) async {
     try {
@@ -46,6 +53,12 @@ class ApiBiddingService {
         return false;
       }
 
+      if (stompClient == null || !stompClient.connected) {
+        print("🚨 WebSocket is not connected. Reconnecting...");
+        _connectWebSocket();
+        await Future.delayed(const Duration(seconds: 2));
+      }
+
       var bidRequest = jsonEncode({
         "itemId": itemId,
         "userId": userId,
@@ -53,7 +66,7 @@ class ApiBiddingService {
       });
 
       stompClient.send(
-        destination: '/app/create', // ✅ Kiểm tra nếu backend nhận đúng
+        destination: '/app/create',
         body: bidRequest,
       );
 

@@ -109,7 +109,7 @@ class ApiPaymentService {
       return [];
     }
 
-    final url = Uri.parse("http://192.168.1.30:8080/api/v1/payment/won-items/$userId");
+    final url = Uri.parse("http://192.168.1.30/api/v1/payment/won-items/$userId");
 
     try {
       final response = await http.get(
