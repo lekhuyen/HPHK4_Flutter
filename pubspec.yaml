@@ -41,6 +41,7 @@ dependencies:
   cupertino_icons: ^1.0.8
   http: ^1.1.2
   intl: ^0.17.0
+  dart_jsonwebtoken: ^2.14.0
 
 dev_dependencies:
   flutter_test:

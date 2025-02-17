@@ -49,7 +49,6 @@ class ApiBiddingService {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       String? userId = prefs.getString("userId");
-
       if (userId == null) {
         print("🚨 User not logged in!");
         return false;

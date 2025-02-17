@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../models/User.dart';
 import '../services/ApiUserService.dart';
 import 'CreateAuctionItemsPage.dart';
+import 'MyAccountPage.dart';
 import 'MyAuctionPage.dart';
 import 'MyBidsPage.dart';
 import 'WonItemsPage.dart';
@@ -469,7 +470,21 @@ class _LoginPageState extends State<LoginPage> {
 
               // Các mục chỉ hiển thị khi người dùng đã đăng nhập
               if (_username != null) ...[
-                _buildListTile("My Account", () {}),
+                _buildListTile("My Account", () async {
+                  SharedPreferences prefs = await SharedPreferences.getInstance();
+                  String? username = prefs.getString('username') ?? "Guest";
+                  String? userId = prefs.getString('userId') ?? "Unknown ID";
+                  String? token = prefs.getString('token') ?? "No Token";
+
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => MyAccountPage(
+                      username: username,
+                      userId: userId,
+                      token: token,
+                    )),
+                  );
+                }),
                 _buildListTile("Create Auction", () {
                   Navigator.push(
                     context,

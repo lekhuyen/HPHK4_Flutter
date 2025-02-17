@@ -49,7 +49,7 @@ class _MyBidsPageState extends State<MyBidsPage> with SingleTickerProviderStateM
     if (userId == null) return;
 
     final response = await http.get(
-      Uri.parse("http://192.168.1.30:8080/api/v1/payment/bids/$userId"),
+      Uri.parse("http://173.16.16.135:8080/api/v1/payment/bids/$userId"),
       headers: {"Content-Type": "application/json"},
     );
 
