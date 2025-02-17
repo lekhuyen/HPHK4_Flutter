@@ -6,7 +6,7 @@ import '../models/Auction_Items.dart';
 
 class ApiPaymentService {
   static const String _baseUrl =
-      "http:// 173.16.16.159:8080"; // ✅ Đổi thành URL backend của bạn
+      "http://173.16.16.159:8080"; // ✅ Đổi thành URL backend của bạn
 
   Future<String?> createPayment(
       String productId, double amount, String orderId) async {
@@ -62,7 +62,7 @@ class ApiPaymentService {
     }
 
     final url =
-        Uri.parse("http:// 173.16.16.159:8080/api/v1/payment/bids/$userId");
+        Uri.parse("http://173.16.16.159:8080/api/v1/payment/bids/$userId");
 
     try {
       final response = await http.get(
@@ -115,7 +115,7 @@ class ApiPaymentService {
     }
 
     final url =
-        Uri.parse("http:// 173.16.16.159/api/v1/payment/won-items/$userId");
+        Uri.parse("http://173.16.16.159/api/v1/payment/won-items/$userId");
 
     try {
       final response = await http.get(
