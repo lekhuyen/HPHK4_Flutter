@@ -56,17 +56,18 @@ class _Auction_ItemsDetailPageState extends State<Auction_ItemsDetailPage> {
     try {
       var newItem = await apiService.getItemById(widget.item.itemId!);
 
-      print("✅ Loaded item details: ${newItem.toJson()}"); // 🔥 Debug toàn bộ dữ liệu từ API
+      print("✅ API returned item details: ${newItem.toJson()}"); // 🔥 Debug toàn bộ dữ liệu API trả về
 
       setState(() {
-        updatedItem = newItem;
+        updatedItem = newItem; // ✅ Cập nhật dữ liệu mới từ API
       });
 
-      print("✅ Updated item price: ${updatedItem?.startingPrice}"); // 🔥 Kiểm tra giá sau cập nhật
+      print("✅ Updated item price in UI: ${updatedItem?.currentPrice}"); // 🔥 Kiểm tra giá sau khi cập nhật
     } catch (e) {
       print("🚨 Lỗi khi tải sản phẩm mới: $e");
     }
   }
+
 
 
 
@@ -96,10 +97,6 @@ class _Auction_ItemsDetailPageState extends State<Auction_ItemsDetailPage> {
       );
     }
   }
-
-
-
-
 
   /// Gọi API để lấy danh sách sản phẩm sắp tới
   Future<void> fetchUpcomingItems() async {
@@ -167,6 +164,21 @@ class _Auction_ItemsDetailPageState extends State<Auction_ItemsDetailPage> {
   @override
   Widget build(BuildContext context) {
     final item = updatedItem ?? widget.item; // 🔥 Sử dụng giá mới nếu có
+    @override
+    Widget build(BuildContext context) {
+      final item = updatedItem ?? widget.item;
+
+      print("🔥 Displaying price in UI: Current Price = ${item.currentPrice}, Starting Price = ${item.startingPrice}"); // 🔥 Debug giá hiển thị trên UI
+
+      return Scaffold(
+        appBar: AppBar(title: Text(item.itemName ?? 'Item Details')),
+        body: Column(
+          children: [
+            Text("Price: \$${item.currentPrice ?? item.startingPrice ?? 0}"), // ✅ Hiển thị current_price nếu có
+          ],
+        ),
+      );
+    }
 
     String imageUrl = (widget.item.images != null && widget.item.images!.isNotEmpty)
         ? widget.item.images!.first
@@ -222,7 +234,7 @@ class _Auction_ItemsDetailPageState extends State<Auction_ItemsDetailPage> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    Text('Price: \$${item.startingPrice ?? 0}', style: const TextStyle(fontSize: 18)),
+                    Text('Price: \$${item.currentPrice ?? item.startingPrice ?? 0}', style: const TextStyle(fontSize: 18)),
                     Text('Time Left: $timeLeft', style: const TextStyle(fontSize: 16, color: Colors.red)),
                   ],
                 ),

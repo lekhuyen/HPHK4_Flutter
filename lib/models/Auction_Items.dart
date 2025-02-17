@@ -90,6 +90,8 @@ class AuctionItems {
 
   // Update the fromJson constructor to handle category properly
   AuctionItems.fromJson(Map<String, dynamic> json) {
+    print("🔍 Parsing JSON: $json"); // 🔥 Debug JSON trước khi tạo đối tượng
+    
     itemId = json["item_id"];
     itemName = json["item_name"];
     description = json["description"];

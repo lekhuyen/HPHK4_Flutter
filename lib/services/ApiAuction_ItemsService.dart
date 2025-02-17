@@ -1,10 +1,13 @@
+import 'dart:io';
+
 import 'package:fe/models/Auction_Items.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 
 class ApiAuction_ItemsService {
-  static const String url = "http://192.168.1.30:8080/api";
+  static const String url = "http://173.16.16.135:8080/api";
   static const String urlAuctionItems = "$url/auction";
 
   Future<List<AuctionItems>> getAllAuctionItems() async {
@@ -166,7 +169,7 @@ class ApiAuction_ItemsService {
 
 
   Future<int?> getCategoryIdByName(String categoryName) async {
-    final response = await http.get(Uri.parse('http://192.168.1.30:8080/api/category'));
+    final response = await http.get(Uri.parse('http://173.16.16.135:8080/api/category'));
 
     if (response.statusCode == 200) {
       var jsonData = json.decode(response.body);
@@ -193,8 +196,8 @@ class ApiAuction_ItemsService {
       throw Exception("User ID không hợp lệ");
     }
 
-    final response = await http.get(Uri.parse('http://192.168.1.30:8080/api/auction/creator/$userId'));
-    print("📢 API CALL: http://192.168.1.30:8080/api/auction/creator/$userId");
+    final response = await http.get(Uri.parse('http://173.16.16.135:8080/api/auction/creator/$userId'));
+    print("📢 API CALL: http://173.16.16.135:8080/api/auction/creator/$userId");
     print("📢 API RESPONSE STATUS: ${response.statusCode}");
     if (response.statusCode == 200) {
       try {
@@ -233,18 +236,73 @@ class ApiAuction_ItemsService {
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
 
-      double startingPrice = (data['current_price'] != null && data['current_price'] > 0)
-          ? data['current_price']
-          : (data['startingPrice'] ?? 0); // ✅ Ưu tiên giá hiện tại nếu có
+      print("🔍 Raw Data from API: $data"); // 🔥 In toàn bộ dữ liệu API trả về
 
-      print("✅ API returned price: $startingPrice"); // 🔥 Kiểm tra giá
+      double startingPrice = (data['result']['current_price'] != null && data['result']['current_price'] > 0)
+          ? data['result']['current_price'] // ✅ Lấy current_price nếu có
+          : (data['result']['starting_price'] ?? 0); // Nếu không có current_price, lấy starting_price
 
-      return AuctionItems.fromJson({...data, 'startingPrice': startingPrice});
+      print("✅ API returned price: $startingPrice"); // 🔥 Debug giá lấy được
+
+      return AuctionItems.fromJson({...data['result'], 'startingPrice': startingPrice});
     } else {
       throw Exception("Failed to load auction item");
     }
   }
 
+  Future<bool> createAuctionItem(String itemName, Map<String, dynamic> itemData, File imageFile) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      String? token = prefs.getString('token'); // Get saved token
+
+      if (token == null) {
+        print("🚨 Error: No authentication token found.");
+        return false;
+      }
+
+      var request = http.MultipartRequest(
+        'POST',
+        Uri.parse("$urlAuctionItems/add"),
+      );
+
+      request.headers.addAll({
+        "Authorization": "Bearer $token",
+        // ✅ Keep only the Authorization header
+      });
+
+      // ✅ Add form fields
+      request.fields['itemName'] = itemName;
+      itemData.forEach((key, value) {
+        request.fields[key] = value.toString();
+      });
+
+      // ✅ Attach the image file
+      var multipartFile = await http.MultipartFile.fromPath(
+        'images', // Make sure this matches the API's expected key
+        imageFile.path,
+      );
+
+      request.files.add(multipartFile);
+
+      var response = await request.send();
+      var responseBody = await response.stream.bytesToString();
+
+      print("📢 API Response Code: ${response.statusCode}");
+      print("📢 API Response Body: $responseBody");
+
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        print("✅ Auction item created successfully!");
+        return true;
+      } else {
+        print("❌ Failed to create auction item: $responseBody");
+      }
+
+      return false;
+    } catch (e) {
+      print("🚨 Error creating auction item: $e");
+      return false;
+    }
+  }
 
 
 }

@@ -5,7 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../models/Auction_Items.dart';
 
 class ApiPaymentService {
-  static const String _baseUrl = "http://192.168.1.30:8080"; // ✅ Đổi thành URL backend của bạn
+  static const String _baseUrl = "http://173.16.16.135:8080"; // ✅ Đổi thành URL backend của bạn
 
   Future<String?> createPayment(String productId, double amount, String orderId) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -57,7 +57,7 @@ class ApiPaymentService {
       return null;
     }
 
-    final url = Uri.parse("http://192.168.1.30:8080/api/v1/payment/bids/$userId");
+    final url = Uri.parse("http://173.16.16.135:8080/api/v1/payment/bids/$userId");
 
     try {
       final response = await http.get(
@@ -109,7 +109,7 @@ class ApiPaymentService {
       return [];
     }
 
-    final url = Uri.parse("http://192.168.1.30/api/v1/payment/won-items/$userId");
+    final url = Uri.parse("http://173.16.16.135/api/v1/payment/won-items/$userId");
 
     try {
       final response = await http.get(
