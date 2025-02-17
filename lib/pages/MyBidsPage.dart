@@ -13,7 +13,8 @@ class MyBidsPage extends StatefulWidget {
   State<MyBidsPage> createState() => _MyBidsPageState();
 }
 
-class _MyBidsPageState extends State<MyBidsPage> with SingleTickerProviderStateMixin {
+class _MyBidsPageState extends State<MyBidsPage>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final ApiPaymentService _apiPaymentService = ApiPaymentService();
   List<AuctionItems> paidItems = [];
@@ -49,7 +50,7 @@ class _MyBidsPageState extends State<MyBidsPage> with SingleTickerProviderStateM
     if (userId == null) return;
 
     final response = await http.get(
-      Uri.parse("http://173.16.16.135:8080/api/v1/payment/bids/$userId"),
+      Uri.parse("http://173.16.16.159:8080/api/v1/payment/bids/$userId"),
       headers: {"Content-Type": "application/json"},
     );
 
@@ -60,8 +61,12 @@ class _MyBidsPageState extends State<MyBidsPage> with SingleTickerProviderStateM
       final data = jsonDecode(response.body);
 
       setState(() {
-        paidItems = (data["paid"] as List).map((e) => AuctionItems.fromJson(e)).toList();
-        unpaidItems = (data["unpaid"] as List).map((e) => AuctionItems.fromJson(e)).toList();
+        paidItems = (data["paid"] as List)
+            .map((e) => AuctionItems.fromJson(e))
+            .toList();
+        unpaidItems = (data["unpaid"] as List)
+            .map((e) => AuctionItems.fromJson(e))
+            .toList();
         isLoading = false;
       });
 
@@ -79,14 +84,16 @@ class _MyBidsPageState extends State<MyBidsPage> with SingleTickerProviderStateM
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('My Bids', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+        title: const Text('My Bids',
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
         centerTitle: true,
         bottom: TabBar(
           controller: _tabController,
           indicatorColor: Colors.blue,
           labelColor: Colors.black,
           unselectedLabelColor: Colors.grey,
-          labelStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          labelStyle:
+              const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           tabs: const [
             Tab(text: 'Paid'),
             Tab(text: 'Unpaid'),
@@ -96,19 +103,20 @@ class _MyBidsPageState extends State<MyBidsPage> with SingleTickerProviderStateM
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : Column(
-        children: [
-          if (userId == null) _buildLoginPrompt(), // ✅ Hiển thị đăng nhập trên cùng
-          Expanded(
-            child: TabBarView(
-              controller: _tabController,
               children: [
-                _buildBidList(paidItems, "No paid items"),
-                _buildBidList(unpaidItems, "No unpaid items"),
+                if (userId == null)
+                  _buildLoginPrompt(), // ✅ Hiển thị đăng nhập trên cùng
+                Expanded(
+                  child: TabBarView(
+                    controller: _tabController,
+                    children: [
+                      _buildBidList(paidItems, "No paid items"),
+                      _buildBidList(unpaidItems, "No unpaid items"),
+                    ],
+                  ),
+                ),
               ],
             ),
-          ),
-        ],
-      ),
     );
   }
 
@@ -136,7 +144,8 @@ class _MyBidsPageState extends State<MyBidsPage> with SingleTickerProviderStateM
               backgroundColor: Colors.teal,
               padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
             ),
-            child: const Text("LOG IN", style: TextStyle(fontSize: 16, color: Colors.white)),
+            child: const Text("LOG IN",
+                style: TextStyle(fontSize: 16, color: Colors.white)),
           ),
         ],
       ),
@@ -146,39 +155,47 @@ class _MyBidsPageState extends State<MyBidsPage> with SingleTickerProviderStateM
   Widget _buildBidList(List<AuctionItems> items, String emptyText) {
     return items.isEmpty
         ? Column(
-      children: [
-        const SizedBox(height: 16),
-        Text(emptyText, style: const TextStyle(fontSize: 16, color: Colors.black54)),
-      ],
-    )
+            children: [
+              const SizedBox(height: 16),
+              Text(emptyText,
+                  style: const TextStyle(fontSize: 16, color: Colors.black54)),
+            ],
+          )
         : ListView.builder(
-      padding: const EdgeInsets.all(16.0),
-      itemCount: items.length,
-      itemBuilder: (context, index) {
-        AuctionItems item = items[index];
-        return Card(
-          elevation: 2,
-          margin: const EdgeInsets.symmetric(vertical: 8),
-          child: ListTile(
-            leading: item.images != null && item.images!.isNotEmpty
-                ? Image.network(item.images!.first, width: 50, height: 50, fit: BoxFit.cover)
-                : const Icon(Icons.image, size: 50),
-            title: Text(item.itemName ?? "No Name"),
-            subtitle: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text("Price: \$${item.startingPrice ?? 0}"),
-                if (item.ispaid ?? false) Text("Buyer: ${item.buyerName}", style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)), // ✅ Hiển thị tên người thanh toán
-              ],
-            ),
-            trailing: Text(
-              (item.ispaid ?? false) ? "Paid ✅" : "Unpaid ❌",
-              style: TextStyle(color: (item.ispaid ?? false) ? Colors.green : Colors.red),
-            ),
-          ),
-        );
-      },
-    );
+            padding: const EdgeInsets.all(16.0),
+            itemCount: items.length,
+            itemBuilder: (context, index) {
+              AuctionItems item = items[index];
+              return Card(
+                elevation: 2,
+                margin: const EdgeInsets.symmetric(vertical: 8),
+                child: ListTile(
+                  leading: item.images != null && item.images!.isNotEmpty
+                      ? Image.network(item.images!.first,
+                          width: 50, height: 50, fit: BoxFit.cover)
+                      : const Icon(Icons.image, size: 50),
+                  title: Text(item.itemName ?? "No Name"),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text("Price: \$${item.startingPrice ?? 0}"),
+                      if (item.ispaid ?? false)
+                        Text("Buyer: ${item.buyerName}",
+                            style: const TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight
+                                    .bold)), // ✅ Hiển thị tên người thanh toán
+                    ],
+                  ),
+                  trailing: Text(
+                    (item.ispaid ?? false) ? "Paid ✅" : "Unpaid ❌",
+                    style: TextStyle(
+                        color:
+                            (item.ispaid ?? false) ? Colors.green : Colors.red),
+                  ),
+                ),
+              );
+            },
+          );
   }
-
 }

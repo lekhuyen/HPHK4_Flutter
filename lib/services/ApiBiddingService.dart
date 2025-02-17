@@ -5,7 +5,8 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiBiddingService {
-  final String apiUrl = "http://173.16.16.135:8080/api/bidding";
+  final String apiUrl = "http://173.16.16.159:8080/api/bidding";
+
   // 192.168.1.134
   // 10.130.53.23
   late StompClient stompClient;

@@ -1,5 +1,3 @@
-import 'package:fe/pages/ChatList.dart';
-import 'package:fe/pages/CreateAuctionItemsPage.dart';
 import 'package:fe/pages/HomePage.dart';
 import 'package:flutter/material.dart';
 
