@@ -14,11 +14,12 @@ class LoginPage extends StatefulWidget {
   @override
   _LoginPageState createState() => _LoginPageState();
 }
-class _LoginPageState extends State<LoginPage> {
 
+class _LoginPageState extends State<LoginPage> {
   Future<void> _navigateToMyAuctions() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? userId = prefs.getString('userId'); // Giả sử bạn đã lưu userId vào SharedPreferences
+    String? userId = prefs
+        .getString('userId'); // Giả sử bạn đã lưu userId vào SharedPreferences
 
     if (userId != null) {
       Navigator.push(
@@ -46,7 +47,9 @@ class _LoginPageState extends State<LoginPage> {
     if (response != null && response.containsKey('result')) {
       var result = response['result'];
 
-      if (result != null && result.containsKey('userId') && result.containsKey('token')) {
+      if (result != null &&
+          result.containsKey('userId') &&
+          result.containsKey('token')) {
         String userId = result['userId'];
         String token = result['token'];
 
@@ -69,7 +72,6 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-
   Future<void> _loadUserData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? username = prefs.getString('username');
@@ -87,12 +89,14 @@ class _LoginPageState extends State<LoginPage> {
       print("🚨 Không tìm thấy thông tin đăng nhập!");
     }
   }
+
   Future<void> _loadUsername() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
       _username = prefs.getString('username');
     });
   }
+
   Future<void> _logout() async {
     print("🚨 Đang thực hiện logout!");
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -102,11 +106,13 @@ class _LoginPageState extends State<LoginPage> {
     _username = null;
     setState(() {});
   }
- void _showSignUpDialog(BuildContext context) {
+
+  void _showSignUpDialog(BuildContext context) {
     final TextEditingController usernameController = TextEditingController();
     final TextEditingController emailController = TextEditingController();
     final TextEditingController passwordController = TextEditingController();
-    final TextEditingController confirmPasswordController = TextEditingController();
+    final TextEditingController confirmPasswordController =
+        TextEditingController();
     bool isChecked = false;
 
     showModalBottomSheet(
@@ -129,23 +135,37 @@ class _LoginPageState extends State<LoginPage> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text("Sign Up", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                        IconButton(icon: const Icon(Icons.close), onPressed: () => Navigator.pop(context)),
+                        const Text("Sign Up",
+                            style: TextStyle(
+                                fontSize: 20, fontWeight: FontWeight.bold)),
+                        IconButton(
+                            icon: const Icon(Icons.close),
+                            onPressed: () => Navigator.pop(context)),
                       ],
                     ),
                     const SizedBox(height: 15),
 
                     // Username
-                    TextField(controller: usernameController, decoration: _inputDecoration("Username")),
+                    TextField(
+                        controller: usernameController,
+                        decoration: _inputDecoration("Username")),
                     const SizedBox(height: 15),
                     // Email
-                    TextField(controller: emailController, decoration: _inputDecoration("Email")),
+                    TextField(
+                        controller: emailController,
+                        decoration: _inputDecoration("Email")),
                     const SizedBox(height: 15),
                     // Password
-                    TextField(controller: passwordController, obscureText: true, decoration: _inputDecoration("Password")),
+                    TextField(
+                        controller: passwordController,
+                        obscureText: true,
+                        decoration: _inputDecoration("Password")),
                     const SizedBox(height: 15),
                     // Confirm Password
-                    TextField(controller: confirmPasswordController, obscureText: true, decoration: _inputDecoration("Confirm Password")),
+                    TextField(
+                        controller: confirmPasswordController,
+                        obscureText: true,
+                        decoration: _inputDecoration("Confirm Password")),
                     const SizedBox(height: 15),
 
                     // Checkbox Terms & Conditions
@@ -160,7 +180,9 @@ class _LoginPageState extends State<LoginPage> {
                           },
                         ),
                         const Center(
-                          child: Text("I agree to the Terms & Conditions", style: TextStyle(fontSize: 14, color: Colors.black54)),
+                          child: Text("I agree to the Terms & Conditions",
+                              style: TextStyle(
+                                  fontSize: 14, color: Colors.black54)),
                         ),
                       ],
                     ),
@@ -193,27 +215,31 @@ class _LoginPageState extends State<LoginPage> {
                     ElevatedButton(
                       onPressed: isChecked
                           ? () async {
-                        if (passwordController.text != confirmPasswordController.text) {
-                          _showMessage(context, "Passwords do not match!");
-                          return;
-                        }
-                        User newUser = User(
-                          name: usernameController.text,
-                          email: emailController.text,
-                          password: passwordController.text,
-                        );
+                              if (passwordController.text !=
+                                  confirmPasswordController.text) {
+                                _showMessage(
+                                    context, "Passwords do not match!");
+                                return;
+                              }
+                              User newUser = User(
+                                name: usernameController.text,
+                                email: emailController.text,
+                                password: passwordController.text,
+                              );
 
-                        bool isSuccess = await _apiUserService.registerUser(newUser);
-                        if (isSuccess) {
-                          _showMessage(context, "Sign Up Successful!");
-                          Navigator.pop(context);
-                        } else {
-                          _showMessage(context, "Sign Up Failed!");
-                        }
-                      }
+                              bool isSuccess =
+                                  await _apiUserService.registerUser(newUser);
+                              if (isSuccess) {
+                                _showMessage(context, "Sign Up Successful!");
+                                Navigator.pop(context);
+                              } else {
+                                _showMessage(context, "Sign Up Failed!");
+                              }
+                            }
                           : null,
                       style: _buttonStyle(),
-                      child: const Text("SIGN UP", style: TextStyle(fontSize: 18, color: Colors.white)),
+                      child: const Text("SIGN UP",
+                          style: TextStyle(fontSize: 18, color: Colors.white)),
                     ),
                   ],
                 ),
@@ -224,6 +250,7 @@ class _LoginPageState extends State<LoginPage> {
       },
     );
   }
+
   void _showLoginDialog(BuildContext context) {
     final TextEditingController emailController = TextEditingController();
     final TextEditingController passwordController = TextEditingController();
@@ -245,65 +272,81 @@ class _LoginPageState extends State<LoginPage> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text("Log In", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                    IconButton(icon: const Icon(Icons.close), onPressed: (  ) => Navigator.pop(context)),
+                    const Text("Log In",
+                        style: TextStyle(
+                            fontSize: 20, fontWeight: FontWeight.bold)),
+                    IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () => Navigator.pop(context)),
                   ],
                 ),
                 const SizedBox(height: 15),
-
-                TextField(controller: emailController, decoration: _inputDecoration("Email")),
+                TextField(
+                    controller: emailController,
+                    decoration: _inputDecoration("Email")),
                 const SizedBox(height: 15),
-                TextField(controller: passwordController, obscureText: true, decoration: _inputDecoration("Password")),
+                TextField(
+                    controller: passwordController,
+                    obscureText: true,
+                    decoration: _inputDecoration("Password")),
                 const SizedBox(height: 30),
-
                 ElevatedButton(
                   onPressed: () async {
                     String email = emailController.text;
                     String password = passwordController.text;
-                    var response = await _apiUserService.loginUser(email, password);
+                    var response =
+                        await _apiUserService.loginUser(email, password);
                     if (response != null) {
-                      print("📢 Full API Response: $response"); // ✅ In toàn bộ dữ liệu trả về
+                      print(
+                          "📢 Full API Response: $response"); // ✅ In toàn bộ dữ liệu trả về
 
-                      if (response != null) {
-                        print("📢 Full API Response: $response"); // ✅ In toàn bộ dữ liệu trả về
+                      print(
+                          "📢 Full API Response: $response"); // ✅ In toàn bộ dữ liệu trả về
 
-                        if (response.containsKey('result')) { // ✅ Kiểm tra key 'result' tồn tại
-                          var result = response['result'];
-                          print("📢 API result: $result"); // ✅ Kiểm tra result có null không
+                      if (response.containsKey('result')) {
+                        // ✅ Kiểm tra key 'result' tồn tại
+                        var result = response['result'];
+                        print(
+                            "📢 API result: $result"); // ✅ Kiểm tra result có null không
 
-                          if (result != null && result.containsKey('userId') && result.containsKey('token')) {
-                            String userId = result['userId'];
-                            String token = result['token']; // ✅ Lấy token từ API
-                            print("✅ userId lấy được: $userId"); // ✅ In userId để kiểm tra
-                            print("✅ Token lấy được: $token"); // ✅ In token để kiểm tra
+                        if (result != null &&
+                            result.containsKey('userId') &&
+                            result.containsKey('token')) {
+                          String userId = result['userId'];
+                          String token = result['token']; // ✅ Lấy token từ API
+                          print(
+                              "✅ userId lấy được: $userId"); // ✅ In userId để kiểm tra
+                          print(
+                              "✅ Token lấy được: $token"); // ✅ In token để kiểm tra
 
-                            SharedPreferences prefs = await SharedPreferences.getInstance();
-                            await prefs.setString('userId', userId); // ✅ Lưu userId vào SharedPreferences
-                            await prefs.setString('token', token); // ✅ Lưu token vào SharedPreferences
+                          SharedPreferences prefs =
+                              await SharedPreferences.getInstance();
+                          await prefs.setString('userId',
+                              userId); // ✅ Lưu userId vào SharedPreferences
+                          await prefs.setString('token',
+                              token); // ✅ Lưu token vào SharedPreferences
 
-                            setState(() {
-                              _username = result['username'];
-                            });
+                          setState(() {
+                            _username = result['username'];
+                          });
 
-                            _showMessage(context, "Login Successful!");
-                            Navigator.pop(context);
-                          } else {
-                            print("🚨 Lỗi: userId hoặc token không có trong result!");
-                          }
+                          _showMessage(context, "Login Successful!");
+                          Navigator.pop(context);
                         } else {
-                          print("🚨 Lỗi: Response không có key 'result'!");
+                          print(
+                              "🚨 Lỗi: userId hoặc token không có trong result!");
                         }
+                      } else {
+                        print("🚨 Lỗi: Response không có key 'result'!");
                       }
-
-
-                    }
-
-                    else {
-                      _showMessage(context, "Login Failed! Check your credentials.");
+                    } else {
+                      _showMessage(
+                          context, "Login Failed! Check your credentials.");
                     }
                   },
                   style: _buttonStyle(),
-                  child: const Text("LOG IN", style: TextStyle(fontSize: 18, color: Colors.white)),
+                  child: const Text("LOG IN",
+                      style: TextStyle(fontSize: 18, color: Colors.white)),
                 ),
                 Center(
                   child: Column(
@@ -364,7 +407,8 @@ class _LoginPageState extends State<LoginPage> {
             ),
         ],
       ),
-      body: SingleChildScrollView(  // Sử dụng SingleChildScrollView
+      body: SingleChildScrollView(
+        // Sử dụng SingleChildScrollView
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
@@ -378,7 +422,10 @@ class _LoginPageState extends State<LoginPage> {
                   children: [
                     Text(
                       "Welcome, $_username!",
-                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.teal),
+                      style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.teal),
                     ),
                     const SizedBox(height: 20),
                   ],
@@ -399,18 +446,22 @@ class _LoginPageState extends State<LoginPage> {
                   onPressed: () => _showLoginDialog(context),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.teal,
-                    padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 40, vertical: 12),
                   ),
-                  child: const Text("LOG IN", style: TextStyle(fontSize: 16, color: Colors.white)),
+                  child: const Text("LOG IN",
+                      style: TextStyle(fontSize: 16, color: Colors.white)),
                 ),
               if (_username != null)
                 ElevatedButton(
                   onPressed: _logout,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.red,
-                    padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 40, vertical: 12),
                   ),
-                  child: const Text("LOG OUT", style: TextStyle(fontSize: 16, color: Colors.white)),
+                  child: const Text("LOG OUT",
+                      style: TextStyle(fontSize: 16, color: Colors.white)),
                 ),
 
               const SizedBox(height: 30),
@@ -422,31 +473,32 @@ class _LoginPageState extends State<LoginPage> {
                 _buildListTile("Create Auction", () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => const CreateAuctionItemsPage()),
+                    MaterialPageRoute(
+                        builder: (context) => const CreateAuctionItemsPage()),
                   );
                 }),
                 _buildListTile("Won Items", () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => const WonItemsPage()), // ✅ Chuyển đến trang Won Items
+                    MaterialPageRoute(
+                        builder: (context) =>
+                            const WonItemsPage()), // ✅ Chuyển đến trang Won Items
                   );
                 }),
-
                 _buildListTile("Notifications", () {}),
                 _buildListTile("Message", () {}),
                 _buildListTile("Device Settings", () {}),
                 const Divider(),
               ],
 
-
-              _buildListTile("Help Center",() {}),
-              _buildListTile("Send App Feedback",() {}),
+              _buildListTile("Help Center", () {}),
+              _buildListTile("Send App Feedback", () {}),
 
               const Divider(),
-              _buildListTile("About LiveAuctioneers",() {}),
-              _buildListTile("Terms & Conditions",() {}),
-              _buildListTile("Privacy Policy",() {}),
-              _buildListTile("Cookie Policy",() {}),
+              _buildListTile("About LiveAuctioneers", () {}),
+              _buildListTile("Terms & Conditions", () {}),
+              _buildListTile("Privacy Policy", () {}),
+              _buildListTile("Cookie Policy", () {}),
 
               const SizedBox(height: 20),
 
@@ -464,14 +516,15 @@ class _LoginPageState extends State<LoginPage> {
       ),
     );
   }
+
   Widget _buildListTile(String title, VoidCallback onTap) {
     return ListTile(
       title: Text(title),
-      trailing: Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
+      trailing:
+          const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
       onTap: onTap, // Gọi hàm điều hướng
     );
   }
-
 
   InputDecoration _inputDecoration(String label) {
     return InputDecoration(
@@ -489,7 +542,7 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   void _showMessage(BuildContext context, String message) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message)));
   }
 }
-

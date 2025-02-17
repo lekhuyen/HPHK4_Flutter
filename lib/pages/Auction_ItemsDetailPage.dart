@@ -1,3 +1,4 @@
+import 'package:fe/pages/ChatRoom.dart';
 import 'package:flutter/material.dart';
 import 'package:fe/models/Auction_Items.dart';
 import 'package:fe/services/ApiAuction_ItemsService.dart';
@@ -9,10 +10,11 @@ import 'HomePage.dart';
 import 'PaymentWebView.dart';
 
 class Auction_ItemsDetailPage extends StatefulWidget {
-   final AuctionItems item;
+  final AuctionItems item;
   const Auction_ItemsDetailPage({super.key, required this.item});
   @override
-  _Auction_ItemsDetailPageState createState() => _Auction_ItemsDetailPageState();
+  _Auction_ItemsDetailPageState createState() =>
+      _Auction_ItemsDetailPageState();
 }
 
 class _Auction_ItemsDetailPageState extends State<Auction_ItemsDetailPage> {
@@ -23,7 +25,6 @@ class _Auction_ItemsDetailPageState extends State<Auction_ItemsDetailPage> {
   bool isPlacingBid = false; // Trạng thái loading khi đặt giá
   AuctionItems? updatedItem; // 🔥 Biến giữ dữ liệu mới
 
-
   @override
   void initState() {
     super.initState();
@@ -33,7 +34,8 @@ class _Auction_ItemsDetailPageState extends State<Auction_ItemsDetailPage> {
 
     ApiBiddingService biddingService = ApiBiddingService();
     biddingService.onNewBidReceived = (double newPrice) {
-      print("🔄 WebSocket received new price: $newPrice"); // 🔥 Debug giá mới từ WebSocket
+      print(
+          "🔄 WebSocket received new price: $newPrice"); // 🔥 Debug giá mới từ WebSocket
       fetchItemDetails(); // 🔥 Thay vì chỉ cập nhật giá, gọi lại API
     };
 
@@ -50,25 +52,24 @@ class _Auction_ItemsDetailPageState extends State<Auction_ItemsDetailPage> {
     super.dispose();
   }
 
-
   // 🔥 Hàm mới để cập nhật dữ liệu từ API
   Future<void> fetchItemDetails() async {
     try {
       var newItem = await apiService.getItemById(widget.item.itemId!);
 
-      print("✅ Loaded item details: ${newItem.toJson()}"); // 🔥 Debug toàn bộ dữ liệu từ API
+      print(
+          "✅ Loaded item details: ${newItem.toJson()}"); // 🔥 Debug toàn bộ dữ liệu từ API
 
       setState(() {
         updatedItem = newItem;
       });
 
-      print("✅ Updated item price: ${updatedItem?.startingPrice}"); // 🔥 Kiểm tra giá sau cập nhật
+      print(
+          "✅ Updated item price: ${updatedItem?.startingPrice}"); // 🔥 Kiểm tra giá sau cập nhật
     } catch (e) {
       print("🚨 Lỗi khi tải sản phẩm mới: $e");
     }
   }
-
-
 
   Future<void> placeBid() async {
     double? bidAmount = double.tryParse(_bidController.text);
@@ -81,25 +82,25 @@ class _Auction_ItemsDetailPageState extends State<Auction_ItemsDetailPage> {
 
     setState(() => isPlacingBid = true);
 
-    bool success = await ApiBiddingService().placeBid(widget.item.itemId!, bidAmount);
+    bool success =
+        await ApiBiddingService().placeBid(widget.item.itemId!, bidAmount);
     setState(() => isPlacingBid = false);
 
     if (success) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("🎉 Bid placed successfully for \$${bidAmount.toStringAsFixed(2)}!")),
+        SnackBar(
+            content: Text(
+                "🎉 Bid placed successfully for \$${bidAmount.toStringAsFixed(2)}!")),
       );
 
       fetchItemDetails(); // 🔥 Gọi lại API để lấy giá mới nhất
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("🚨 Failed to place bid. Please try again.")),
+        const SnackBar(
+            content: Text("🚨 Failed to place bid. Please try again.")),
       );
     }
   }
-
-
-
-
 
   /// Gọi API để lấy danh sách sản phẩm sắp tới
   Future<void> fetchUpcomingItems() async {
@@ -117,6 +118,7 @@ class _Auction_ItemsDetailPageState extends State<Auction_ItemsDetailPage> {
       setState(() => isLoadingUpcomingItems = false);
     }
   }
+
   /// Tính thời gian còn lại của phiên đấu giá
   String getTimeLeft(DateTime? endDate) {
     if (endDate == null) return "No End Date";
@@ -148,7 +150,8 @@ class _Auction_ItemsDetailPageState extends State<Auction_ItemsDetailPage> {
 
     try {
       print("🔍 Fetching items for category ID: $categoryId");
-      var fetchedItems = await apiService.getItemsByCategory(categoryId.toString());
+      var fetchedItems =
+          await apiService.getItemsByCategory(categoryId.toString());
       print("✅ API Response: ${fetchedItems.length} items");
 
       setState(() {
@@ -161,16 +164,14 @@ class _Auction_ItemsDetailPageState extends State<Auction_ItemsDetailPage> {
     }
   }
 
-
-
-
   @override
   Widget build(BuildContext context) {
     final item = updatedItem ?? widget.item; // 🔥 Sử dụng giá mới nếu có
 
-    String imageUrl = (widget.item.images != null && widget.item.images!.isNotEmpty)
-        ? widget.item.images!.first
-        : 'https://via.placeholder.com/150';
+    String imageUrl =
+        (widget.item.images != null && widget.item.images!.isNotEmpty)
+            ? widget.item.images!.first
+            : 'https://via.placeholder.com/150';
 
     String timeLeft = getTimeLeft(widget.item.endDate);
 
@@ -182,14 +183,14 @@ class _Auction_ItemsDetailPageState extends State<Auction_ItemsDetailPage> {
           onPressed: () {
             Navigator.pushReplacement(
               context,
-                MaterialPageRoute(
-                builder: (context) => const Homepage(initialIndex: 0), // 🔥 Quay về trang chính
+              MaterialPageRoute(
+                builder: (context) =>
+                    const Homepage(initialIndex: 0), // 🔥 Quay về trang chính
               ),
             );
           },
         ),
       ),
-
       body: SingleChildScrollView(
         physics: const BouncingScrollPhysics(),
         padding: const EdgeInsets.all(16.0),
@@ -216,14 +217,18 @@ class _Auction_ItemsDetailPageState extends State<Auction_ItemsDetailPage> {
                 Expanded(
                   child: Text(
                     widget.item.itemName ?? 'No Name',
-                    style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                        fontSize: 24, fontWeight: FontWeight.bold),
                   ),
                 ),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    Text('Price: \$${item.startingPrice ?? 0}', style: const TextStyle(fontSize: 18)),
-                    Text('Time Left: $timeLeft', style: const TextStyle(fontSize: 16, color: Colors.red)),
+                    Text('Price: \$${item.startingPrice ?? 0}',
+                        style: const TextStyle(fontSize: 18)),
+                    Text('Time Left: $timeLeft',
+                        style:
+                            const TextStyle(fontSize: 16, color: Colors.red)),
                   ],
                 ),
               ],
@@ -257,19 +262,27 @@ class _Auction_ItemsDetailPageState extends State<Auction_ItemsDetailPage> {
               onPressed: () async {
                 final apiPaymentService = ApiPaymentService();
 
-                String orderId = DateTime.now().millisecondsSinceEpoch.toString(); // ✅ Tạo orderId duy nhất
-                String productId = widget.item.itemId.toString(); // 🔥 Chuyển `int?` thành `String`
+                String orderId = DateTime.now()
+                    .millisecondsSinceEpoch
+                    .toString(); // ✅ Tạo orderId duy nhất
+                String productId = widget.item.itemId
+                    .toString(); // 🔥 Chuyển `int?` thành `String`
 
                 String? paymentUrl = await apiPaymentService.createPayment(
                   productId, // ✅ Đảm bảo `productId` là `String`
-                  widget.item.startingPrice ?? 0, // Vẫn giữ `startingPrice` là `double`
+                  widget.item.startingPrice ??
+                      0, // Vẫn giữ `startingPrice` là `double`
                   orderId,
                 );
 
                 if (paymentUrl != null) {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => PaymentWebView(paymentUrl: paymentUrl, productId: '',)),
+                    MaterialPageRoute(
+                        builder: (context) => PaymentWebView(
+                              paymentUrl: paymentUrl,
+                              productId: '',
+                            )),
                   );
                 } else {
                   print("🚨 Lỗi tạo thanh toán VNPay!");
@@ -281,73 +294,107 @@ class _Auction_ItemsDetailPageState extends State<Auction_ItemsDetailPage> {
               ),
             ),
 
-
             const Divider(),
 
             /// Mô tả sản phẩm
-            const Text("Description", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const Text("Description",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () {
+                  // Navigator.push(
+                  //   context,
+                  //   MaterialPageRoute(
+                  //     builder: (context) => const ChatRoom(),
+                  //   ),
+                  // );
+                },
+                child: isPlacingBid
+                    ? const CircularProgressIndicator()
+                    : const Text("ASK A QUESTION"),
+              ),
+            ),
             const SizedBox(height: 8),
             Text(widget.item.description ?? 'No Description Available.'),
             const Divider(),
-            const Text('Upcomming Items Available Now', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const Text('Upcomming Items Available Now',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             const SizedBox(height: 16),
 
             SizedBox(
               height: 250, // 🔥 Tăng chiều cao nếu cần
               child: isLoadingUpcomingItems
-                  ? const Center(child: CircularProgressIndicator())  // Hiển thị vòng xoay nếu đang tải
+                  ? const Center(
+                      child:
+                          CircularProgressIndicator()) // Hiển thị vòng xoay nếu đang tải
                   : upcomingItems.isEmpty
-                  ? const Center(child: Text("No upcoming items found"))
-                  : ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: upcomingItems.length,
-                itemBuilder: (context, index) {
-                  var item = upcomingItems[index];
-                  String itemImageUrl = (item.images != null && item.images!.isNotEmpty)
-                      ? item.images!.first
-                      : 'https://via.placeholder.com/150';
+                      ? const Center(child: Text("No upcoming items found"))
+                      : ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: upcomingItems.length,
+                          itemBuilder: (context, index) {
+                            var item = upcomingItems[index];
+                            String itemImageUrl =
+                                (item.images != null && item.images!.isNotEmpty)
+                                    ? item.images!.first
+                                    : 'https://via.placeholder.com/150';
 
-                  return GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => Homepage(initialIndex: 0, selectedItem: item), // 🔥 Mở trong HomePage
-                        ),
-                      );
-                    },
-
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(8),
-                            child: Image.network(
-                              itemImageUrl,
-                              width: 150, // 🔥 Kích thước ảnh
-                              height: 120,
-                              fit: BoxFit.cover,
-                              errorBuilder: (context, error, stackTrace) {
-                                return Image.asset('assets/placeholder.jpg', width: 150, height: 120, fit: BoxFit.cover);
+                            return GestureDetector(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => Homepage(
+                                        initialIndex: 0,
+                                        selectedItem:
+                                            item), // 🔥 Mở trong HomePage
+                                  ),
+                                );
                               },
-                            ),
-                          ),
-                          const SizedBox(height: 5),
-                          Text(item.itemName ?? 'No Name', maxLines: 1, overflow: TextOverflow.ellipsis),
-                          Text("\$${item.startingPrice ?? 0}", style: const TextStyle(fontWeight: FontWeight.bold)),
-                          Text("${item.bidStep ?? 0} Bids", style: TextStyle(color: Colors.grey[600])),
-                        ],
-                      ),
-                    ),
-                  );
-                },
-              ),
+                              child: Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    ClipRRect(
+                                      borderRadius: BorderRadius.circular(8),
+                                      child: Image.network(
+                                        itemImageUrl,
+                                        width: 150, // 🔥 Kích thước ảnh
+                                        height: 120,
+                                        fit: BoxFit.cover,
+                                        errorBuilder:
+                                            (context, error, stackTrace) {
+                                          return Image.asset(
+                                              'assets/placeholder.jpg',
+                                              width: 150,
+                                              height: 120,
+                                              fit: BoxFit.cover);
+                                        },
+                                      ),
+                                    ),
+                                    const SizedBox(height: 5),
+                                    Text(item.itemName ?? 'No Name',
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis),
+                                    Text("\$${item.startingPrice ?? 0}",
+                                        style: const TextStyle(
+                                            fontWeight: FontWeight.bold)),
+                                    Text("${item.bidStep ?? 0} Bids",
+                                        style:
+                                            TextStyle(color: Colors.grey[600])),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                        ),
             ),
             const Divider(),
 
             const Divider(),
+
             /// Danh sách sản phẩm liên quan
             const Text('Similar Items Available Now',
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
@@ -357,56 +404,70 @@ class _Auction_ItemsDetailPageState extends State<Auction_ItemsDetailPage> {
               child: isLoadingSimilarItems
                   ? const Center(child: CircularProgressIndicator())
                   : similarItems.isEmpty
-                  ? const Center(child: Text("No similar items found"))
-                  : ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: similarItems.length, // 🔥 Hiển thị tất cả sản phẩm
-                itemBuilder: (context, index) {
-                  var item = similarItems[index];
-                  String itemImageUrl = (item.images != null && item.images!.isNotEmpty)
-                      ? item.images!.first
-                      : 'https://via.placeholder.com/150';
+                      ? const Center(child: Text("No similar items found"))
+                      : ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: similarItems
+                              .length, // 🔥 Hiển thị tất cả sản phẩm
+                          itemBuilder: (context, index) {
+                            var item = similarItems[index];
+                            String itemImageUrl =
+                                (item.images != null && item.images!.isNotEmpty)
+                                    ? item.images!.first
+                                    : 'https://via.placeholder.com/150';
 
-                  return GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => Homepage(initialIndex: 0, selectedItem: item), // 🔥 Mở trong HomePage
-                        ),
-                      );
-                    },
-
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(8),
-                            child: Image.network(
-                              itemImageUrl,
-                              width: 150, // 🔥 Tăng kích thước ảnh nếu cần
-                              height: 120,
-                              fit: BoxFit.cover,
-                              errorBuilder: (context, error, stackTrace) {
-                                return Image.asset('assets/placeholder.jpg', width: 150, height: 120, fit: BoxFit.cover);
+                            return GestureDetector(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => Homepage(
+                                        initialIndex: 0,
+                                        selectedItem:
+                                            item), // 🔥 Mở trong HomePage
+                                  ),
+                                );
                               },
-                            ),
-                          ),
-                          const SizedBox(height: 5),
-                          Text(item.itemName ?? 'No Name', maxLines: 1, overflow: TextOverflow.ellipsis),
-                          Text("\$${item.startingPrice ?? 0}", style: const TextStyle(fontWeight: FontWeight.bold)),
-                          Text("${item.bidStep ?? 0} Bids", style: TextStyle(color: Colors.grey[600])),
-                        ],
-                      ),
-                    ),
-                  );
-                },
-              ),
+                              child: Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    ClipRRect(
+                                      borderRadius: BorderRadius.circular(8),
+                                      child: Image.network(
+                                        itemImageUrl,
+                                        width:
+                                            150, // 🔥 Tăng kích thước ảnh nếu cần
+                                        height: 120,
+                                        fit: BoxFit.cover,
+                                        errorBuilder:
+                                            (context, error, stackTrace) {
+                                          return Image.asset(
+                                              'assets/placeholder.jpg',
+                                              width: 150,
+                                              height: 120,
+                                              fit: BoxFit.cover);
+                                        },
+                                      ),
+                                    ),
+                                    const SizedBox(height: 5),
+                                    Text(item.itemName ?? 'No Name',
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis),
+                                    Text("\$${item.startingPrice ?? 0}",
+                                        style: const TextStyle(
+                                            fontWeight: FontWeight.bold)),
+                                    Text("${item.bidStep ?? 0} Bids",
+                                        style:
+                                            TextStyle(color: Colors.grey[600])),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                        ),
             ),
-
-
           ],
         ),
       ),

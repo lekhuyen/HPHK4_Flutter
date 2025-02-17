@@ -2,9 +2,10 @@ import 'package:fe/models/Auction_Items.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
-
 class ApiAuction_ItemsService {
-  static const String url = "http://192.168.1.30:8080/api";
+  static const String url = "http://173.16.16.159:8080/api";
+  //
+  // 192.168.1.30
   static const String urlAuctionItems = "$url/auction";
 
   Future<List<AuctionItems>> getAllAuctionItems() async {
@@ -14,7 +15,8 @@ class ApiAuction_ItemsService {
       List<AuctionItems> allItems = [];
 
       do {
-        final response = await http.get(Uri.parse('$urlAuctionItems?page=$currentPage&pageSize=3'));
+        final response = await http
+            .get(Uri.parse('$urlAuctionItems?page=$currentPage&pageSize=3'));
         print("Fetching page $currentPage: ${response.statusCode}");
 
         if (response.statusCode == 200) {
@@ -28,7 +30,6 @@ class ApiAuction_ItemsService {
               try {
                 AuctionItems auctionItem = AuctionItems.fromJson(item);
                 allItems.add(auctionItem);
-
               } catch (e) {
                 print("Error parsing auction item: $e");
               }
@@ -49,7 +50,6 @@ class ApiAuction_ItemsService {
     }
   }
 
-
   Future<List<AuctionItems>> getAllAuctionItemsn() async {
     try {
       final response = await http.get(Uri.parse(urlAuctionItems));
@@ -60,7 +60,8 @@ class ApiAuction_ItemsService {
 
         print("Decoded auction items data: $data");
 
-        for (var item in data['result']['data']) { // Adjust the data path based on your actual JSON structure
+        for (var item in data['result']['data']) {
+          // Adjust the data path based on your actual JSON structure
           AuctionItems auctionItems = AuctionItems.fromJson(item);
           list.add(auctionItems);
         }
@@ -75,7 +76,6 @@ class ApiAuction_ItemsService {
       throw Exception('Error fetching auction items data: $e');
     }
   }
-
 
   Future<AuctionItems?> getAuctionItemById(int id) async {
     try {
@@ -109,7 +109,8 @@ class ApiAuction_ItemsService {
         return null; // Return null if the item is not found (404)
       } else {
         print("Error response body: ${response.body}");
-        throw Exception('Failed to load auction item. Status Code: ${response.statusCode}');
+        throw Exception(
+            'Failed to load auction item. Status Code: ${response.statusCode}');
       }
     } catch (e) {
       print("Error fetching auction item by ID: $e");
@@ -140,7 +141,8 @@ class ApiAuction_ItemsService {
 
   Future<List<AuctionItems>> getItemsByCategory(String categoryId) async {
     try {
-      final response = await http.get(Uri.parse('$urlAuctionItems/category/$categoryId?size=100'));
+      final response = await http
+          .get(Uri.parse('$urlAuctionItems/category/$categoryId?size=100'));
 
       if (response.statusCode == 200) {
         var jsonData = json.decode(response.body);
@@ -164,9 +166,9 @@ class ApiAuction_ItemsService {
     }
   }
 
-
   Future<int?> getCategoryIdByName(String categoryName) async {
-    final response = await http.get(Uri.parse('http://192.168.1.30:8080/api/category'));
+    final response =
+        await http.get(Uri.parse('http://173.16.16.159:8080/api/category'));
 
     if (response.statusCode == 200) {
       var jsonData = json.decode(response.body);
@@ -175,9 +177,11 @@ class ApiAuction_ItemsService {
         List<dynamic> categories = jsonData['result']['data'];
 
         for (var category in categories) {
-          String? apiCategoryName = category['category_name']; // Đọc đúng key từ API
+          String? apiCategoryName =
+              category['category_name']; // Đọc đúng key từ API
 
-          if (apiCategoryName != null && apiCategoryName.trim() == categoryName.trim()) {
+          if (apiCategoryName != null &&
+              apiCategoryName.trim() == categoryName.trim()) {
             return category['category_id']; // Trả về ID nếu tìm thấy
           }
         }
@@ -193,28 +197,33 @@ class ApiAuction_ItemsService {
       throw Exception("User ID không hợp lệ");
     }
 
-    final response = await http.get(Uri.parse('http://192.168.1.30:8080/api/auction/creator/$userId'));
-    print("📢 API CALL: http://192.168.1.30:8080/api/auction/creator/$userId");
+    final response = await http.get(
+        Uri.parse('http://173.16.16.159:8080/api/auction/creator/$userId'));
+    print("📢 API CALL: http://173.16.16.159:8080/api/auction/creator/$userId");
     print("📢 API RESPONSE STATUS: ${response.statusCode}");
     if (response.statusCode == 200) {
       try {
         final data = jsonDecode(response.body);
 
         if (data.containsKey('result') && data['result'] is List) {
-          List<AuctionItems> auctions = (data['result'] as List).map((item) {
-            try {
-              return AuctionItems.fromJson(item);
-            } catch (e) {
-              print("🚨 Lỗi parse JSON cho item: $item, lỗi: $e");
-              return null;
-            }
-          }).whereType<AuctionItems>().toList(); // Loại bỏ null nếu parse thất bại
+          List<AuctionItems> auctions = (data['result'] as List)
+              .map((item) {
+                try {
+                  return AuctionItems.fromJson(item);
+                } catch (e) {
+                  print("🚨 Lỗi parse JSON cho item: $item, lỗi: $e");
+                  return null;
+                }
+              })
+              .whereType<AuctionItems>()
+              .toList(); // Loại bỏ null nếu parse thất bại
 
           print("✅ Số đấu giá lấy được: ${auctions.length}");
           return auctions;
         } else {
           print("🚨 API không trả về danh sách đấu giá hợp lệ!");
-          throw Exception("API Error: Không có danh sách đấu giá trong kết quả");
+          throw Exception(
+              "API Error: Không có danh sách đấu giá trong kết quả");
         }
       } catch (e) {
         print("🚨 Lỗi giải mã JSON khi lấy đấu giá: $e");
@@ -233,9 +242,10 @@ class ApiAuction_ItemsService {
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
 
-      double startingPrice = (data['current_price'] != null && data['current_price'] > 0)
-          ? data['current_price']
-          : (data['startingPrice'] ?? 0); // ✅ Ưu tiên giá hiện tại nếu có
+      double startingPrice =
+          (data['current_price'] != null && data['current_price'] > 0)
+              ? data['current_price']
+              : (data['startingPrice'] ?? 0); // ✅ Ưu tiên giá hiện tại nếu có
 
       print("✅ API returned price: $startingPrice"); // 🔥 Kiểm tra giá
 
@@ -244,8 +254,4 @@ class ApiAuction_ItemsService {
       throw Exception("Failed to load auction item");
     }
   }
-
-
-
 }
-

@@ -5,7 +5,9 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiBiddingService {
-  final String apiUrl = "http://10.130.53.23:8080/api/bidding";
+  final String apiUrl = "http:// 173.16.16.159:8080/api/bidding";
+  // 192.168.1.134
+  // 10.130.53.23
   late StompClient stompClient;
   Function(double)? onNewBidReceived; // 🔥 Callback để cập nhật UI
 
@@ -16,7 +18,7 @@ class ApiBiddingService {
   void _connectWebSocket() {
     stompClient = StompClient(
       config: StompConfig(
-        url: 'ws://192.168.1.30:8080/ws',
+        url: 'ws://173.16.16.159.159:8080/ws',
         onConnect: (StompFrame frame) {
           print("✅ Connected to WebSocket");
 
@@ -53,7 +55,7 @@ class ApiBiddingService {
         return false;
       }
 
-      if (stompClient == null || !stompClient.connected) {
+      if (!stompClient.connected) {
         print("🚨 WebSocket is not connected. Reconnecting...");
         _connectWebSocket();
         await Future.delayed(const Duration(seconds: 2));

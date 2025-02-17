@@ -1,3 +1,4 @@
+import 'package:fe/pages/ChatList.dart';
 import 'package:fe/pages/LoginPage.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -31,6 +32,7 @@ class _HomepageState extends State<Homepage> {
     _selectedItem = widget.selectedItem;
     _checkUserLoginStatus();
   }
+
   Future<void> _checkUserLoginStatus() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('token');
@@ -46,13 +48,17 @@ class _HomepageState extends State<Homepage> {
       print("✅ Đã tìm thấy token và userId, tiếp tục đăng nhập!");
     }
   }
+
   List<Widget> _getPages() {
     List<Widget> pages = [
       const CategoryItemPage(),
       const AuctionsPage(),
-      const MyAuctionPage(userId: '',),
+      const MyAuctionPage(
+        userId: '',
+      ),
       const MyBidsPage(),
       const LoginPage(),
+      const ChatList(),
     ];
 
     // Nếu có sản phẩm, thay thế trang đầu tiên bằng trang chi tiết
@@ -63,9 +69,9 @@ class _HomepageState extends State<Homepage> {
     return pages;
   }
 
-
   Future<void> _onItemTapped(int index) async {
-    if (index == 2) { // Nếu chọn MyAuction
+    if (index == 2) {
+      // Nếu chọn MyAuction
       SharedPreferences prefs = await SharedPreferences.getInstance();
       String? userId = prefs.getString('userId');
 
@@ -74,13 +80,16 @@ class _HomepageState extends State<Homepage> {
       if (userId != null && userId.isNotEmpty) {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => MyAuctionPage(userId: userId)),
+          MaterialPageRoute(
+              builder: (context) => MyAuctionPage(userId: userId)),
         );
       } else {
         print("⚠️ User chưa đăng nhập, chuyển đến trang Login!");
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const LoginPage()), // 🟢 Chuyển đến LoginPage
+          MaterialPageRoute(
+              builder: (context) =>
+                  const LoginPage()), // 🟢 Chuyển đến LoginPage
         );
       }
     } else {
@@ -97,7 +106,9 @@ class _HomepageState extends State<Homepage> {
     return Scaffold(
       body: (_selectedIndex >= 0 && _selectedIndex < pages.length)
           ? pages[_selectedIndex]
-          : const Center(child: Text("Invalid Page Index")), // Tránh lỗi truy cập ngoài phạm vi
+          : const Center(
+              child: Text(
+                  "Invalid Page Index")), // Tránh lỗi truy cập ngoài phạm vi
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         currentIndex: _selectedIndex,
@@ -108,12 +119,14 @@ class _HomepageState extends State<Homepage> {
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Discover'),
           BottomNavigationBarItem(icon: Icon(Icons.gavel), label: 'Auctions'),
-          BottomNavigationBarItem(icon: Icon(Icons.account_balance_sharp), label: 'MyAuction'),
-          BottomNavigationBarItem(icon: Icon(Icons.shopping_cart), label: 'My Bids'),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.account_balance_sharp), label: 'MyAuction'),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.shopping_cart), label: 'My Bids'),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Me'),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Chat'),
         ],
       ),
     );
   }
-
 }

@@ -7,8 +7,8 @@ import '../models/User.dart';
 import '../pages/LoginPage.dart';
 
 class ApiUserService {
-  static const String baseUrl = "http://192.168.1.30:8080/api/users";
-  static const String loginUrl = "http://192.168.1.30:8080/api/auth";
+  static const String baseUrl = "http:// 173.16.16.159:8080/api/users";
+  static const String loginUrl = "http:// 173.16.16.159:8080/api/auth";
   Future<bool> registerUser(User user) async {
     try {
       final response = await http.post(
@@ -26,7 +26,7 @@ class ApiUserService {
 
   Future<Map<String, dynamic>?> loginUser(String email, String password) async {
     final response = await http.post(
-      Uri.parse("http://192.168.1.30:8080/api/auth/login"),
+      Uri.parse("http://173.16.16.159:8080/api/auth/login"),
       headers: {"Content-Type": "application/json"},
       body: jsonEncode({"email": email, "password": password}),
     );
@@ -62,6 +62,7 @@ class ApiUserService {
       return null;
     }
   }
+
   // Đăng xuất người dùng
   Future<void> logoutUser() async {
     print("🚨 Đang thực hiện logout!");
@@ -71,8 +72,5 @@ class ApiUserService {
     await prefs.remove('token');
 
     print("📢 Đã xóa dữ liệu đăng nhập!");
-
   }
-
-
 }

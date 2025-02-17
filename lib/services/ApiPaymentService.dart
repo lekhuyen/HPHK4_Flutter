@@ -5,17 +5,21 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../models/Auction_Items.dart';
 
 class ApiPaymentService {
-  static const String _baseUrl = "http://192.168.1.30:8080"; // ✅ Đổi thành URL backend của bạn
+  static const String _baseUrl =
+      "http:// 173.16.16.159:8080"; // ✅ Đổi thành URL backend của bạn
 
-  Future<String?> createPayment(String productId, double amount, String orderId) async {
+  Future<String?> createPayment(
+      String productId, double amount, String orderId) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? token = prefs.getString('token'); // ✅ Lấy token từ SharedPreferences
+    String? token =
+        prefs.getString('token'); // ✅ Lấy token từ SharedPreferences
 
     if (token == null) {
       print("🚨 Lỗi: Không tìm thấy token! Người dùng chưa đăng nhập?");
       return null;
     }
-    final url = Uri.parse("$_baseUrl/api/v1/payment/vn-pay").replace(queryParameters: {
+    final url =
+        Uri.parse("$_baseUrl/api/v1/payment/vn-pay").replace(queryParameters: {
       "productId": productId,
       "amount": amount.toString(),
       "orderId": orderId,
@@ -57,7 +61,8 @@ class ApiPaymentService {
       return null;
     }
 
-    final url = Uri.parse("http://192.168.1.30:8080/api/v1/payment/bids/$userId");
+    final url =
+        Uri.parse("http:// 173.16.16.159:8080/api/v1/payment/bids/$userId");
 
     try {
       final response = await http.get(
@@ -109,7 +114,8 @@ class ApiPaymentService {
       return [];
     }
 
-    final url = Uri.parse("http://192.168.1.30/api/v1/payment/won-items/$userId");
+    final url =
+        Uri.parse("http:// 173.16.16.159/api/v1/payment/won-items/$userId");
 
     try {
       final response = await http.get(
@@ -148,7 +154,4 @@ class ApiPaymentService {
       return [];
     }
   }
-
-
 }
-
