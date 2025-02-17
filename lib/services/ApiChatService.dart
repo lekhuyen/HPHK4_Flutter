@@ -7,7 +7,7 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiChatService {
-  static const String baseUrl = "http://173.16.16.159:8080/api";
+  static const String baseUrl = "http://173.16.16.135:8080/api";
   static const String urlChat = "$baseUrl/chatroom";
 
   Future<List<ChatRoomResponse>> getAllRoomByUser(String userId) async {
