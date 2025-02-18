@@ -24,7 +24,7 @@ class AuctionItems {
 
   // Add categoryId and categoryName as separate fields
   int? categoryId;
-  String? categoryName;  // For the category name
+  String? categoryName; // For the category name
 
   // Add category as a field of type Category
   Category? category;
@@ -52,7 +52,7 @@ class AuctionItems {
     this.images,
     this.categoryId,
     this.categoryName,
-    this.category,  // Include category in the constructor
+    this.category, // Include category in the constructor
     this.sellerId,
   });
 
@@ -90,26 +90,28 @@ class AuctionItems {
 
   // Update the fromJson constructor to handle category properly
   AuctionItems.fromJson(Map<String, dynamic> json) {
-    print("🔍 Parsing JSON: $json"); // 🔥 Debug JSON trước khi tạo đối tượng
-    
     itemId = json["item_id"];
     itemName = json["item_name"];
     description = json["description"];
     startingPrice = json["starting_price"];
     currentPrice = json["current_price"];
     ispaid = json["paid"] ?? false; // ✅ Nếu null thì mặc định false
-    buyerName = json["buyer"] != null ? json["buyer"]["name"] : "Unknown Buyer"; // ✅ Lấy tên buyer
+    buyerName = json["buyer"] != null
+        ? json["buyer"]["name"]
+        : "Unknown Buyer"; // ✅ Lấy tên buyer
 
     // ✅ Chuyển đổi start_date từ List<int> thành DateTime
     if (json["start_date"] is List && json["start_date"].length == 3) {
-      startDate = DateTime(json["start_date"][0], json["start_date"][1], json["start_date"][2]);
+      startDate = DateTime(
+          json["start_date"][0], json["start_date"][1], json["start_date"][2]);
     } else {
       startDate = null;
     }
 
     // ✅ Chuyển đổi end_date từ List<int> thành DateTime
     if (json["end_date"] is List && json["end_date"].length == 3) {
-      endDate = DateTime(json["end_date"][0], json["end_date"][1], json["end_date"][2]);
+      endDate = DateTime(
+          json["end_date"][0], json["end_date"][1], json["end_date"][2]);
     } else {
       endDate = null;
     }
@@ -135,8 +137,10 @@ class AuctionItems {
       category = Category.fromJson(json['category']);
     }
 
-    categoryId = json['category'] != null ? json['category']['category_id'] : null;
-    categoryName = json['category'] != null ? json['category']['category_name'] : null;
+    categoryId =
+        json['category'] != null ? json['category']['category_id'] : null;
+    categoryName =
+        json['category'] != null ? json['category']['category_name'] : null;
 
     // ✅ Get sellerId from JSON
     sellerId = json["userId"]?.toString();

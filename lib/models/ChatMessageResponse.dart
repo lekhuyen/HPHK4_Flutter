@@ -50,6 +50,7 @@ class ChatMessageResponse {
             ? DateTime.fromMillisecondsSinceEpoch(json["timestamp"])
             : DateTime.parse(json["timestamp"]))
         : null;
-    imagesList = json["images"] != null ? json["images"].cast<String>() : [];
+    imagesList =
+        json['images'] != null ? List<String>.from(json['images']) : null;
   }
 }
