@@ -6,7 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiAuction_ItemsService {
-  static const String url = "http://173.16.16.159:8080/api";
+  static const String url = "http://192.168.1.30:8080/api";
   static const String urlAuctionItems = "$url/auction";
 
   Future<List<AuctionItems>> getAllAuctionItems() async {
@@ -169,7 +169,7 @@ class ApiAuction_ItemsService {
 
   Future<int?> getCategoryIdByName(String categoryName) async {
     final response =
-        await http.get(Uri.parse('http://173.16.16.159:8080/api/category'));
+        await http.get(Uri.parse('http://192.168.1.30:8080/api/category'));
 
     if (response.statusCode == 200) {
       var jsonData = json.decode(response.body);
@@ -199,8 +199,8 @@ class ApiAuction_ItemsService {
     }
 
     final response = await http.get(
-        Uri.parse('http://173.16.16.159:8080/api/auction/creator/$userId'));
-    print("📢 API CALL: http://173.16.16.159:8080/api/auction/creator/$userId");
+        Uri.parse('http://192.168.1.30:8080/api/auction/creator/$userId'));
+    print("📢 API CALL: http://192.168.1.30:8080/api/auction/creator/$userId");
     print("📢 API RESPONSE STATUS: ${response.statusCode}");
     if (response.statusCode == 200) {
       try {
@@ -237,14 +237,8 @@ class ApiAuction_ItemsService {
 
   Future<AuctionItems> getItemById(int itemId) async {
     final response = await http.get(Uri.parse("$urlAuctionItems/$itemId"));
-
-    print("📡 API Response: ${response.body}"); // 🔥 Debug phản hồi API
-
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
-
-      print("🔍 Raw Data from API: $data"); // 🔥 In toàn bộ dữ liệu API trả về
-
       double startingPrice = (data['result']['current_price'] != null &&
               data['result']['current_price'] > 0)
           ? data['result']['current_price'] // ✅ Lấy current_price nếu có

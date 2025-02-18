@@ -51,7 +51,7 @@ class _ChatRoomState extends State<ChatRoom> {
 
     stompClient = StompClient(
       config: StompConfig(
-        url: 'ws://173.16.16.159:8080/ws',
+        url: 'ws://192.168.1.30:8080/ws',
         webSocketConnectHeaders: {
           'Authorization': 'Bearer $token',
         },
