@@ -1,3 +1,4 @@
+import 'package:fe/services/UrlAPI.dart';
 import 'package:stomp_dart_client/stomp.dart';
 import 'package:stomp_dart_client/stomp_config.dart';
 import 'package:stomp_dart_client/stomp_frame.dart';
@@ -5,8 +6,7 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiBiddingService {
-
-  final String apiUrl = "http://192.168.1.134:8080/api/bidding";
+  final String apiUrl = "${UrlAPI.url}/bidding";
   // 192.168.1.134
   // 10.130.53.23
 
@@ -20,9 +20,7 @@ class ApiBiddingService {
   void _connectWebSocket() {
     stompClient = StompClient(
       config: StompConfig(
-
         url: 'ws://192.168.1.134.159:8080/ws',
-
         onConnect: (StompFrame frame) {
           print("✅ Kết nối WebSocket thành công!");
 
@@ -75,7 +73,7 @@ class ApiBiddingService {
         body: bidRequest,
       );
 
-      print("✅ Đã gửi yêu cầu đặt giá: \$${bidAmount}");
+      print("✅ Đã gửi yêu cầu đặt giá: \$$bidAmount");
       return true;
     } catch (e) {
       print("🚨 Lỗi đặt giá: $e");

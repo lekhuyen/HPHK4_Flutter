@@ -1,5 +1,6 @@
 import 'dart:convert';
 // import 'package:dart_jsonwebtoken/dart_jsonwebtoken.dart';
+import 'package:fe/services/UrlAPI.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -8,10 +9,16 @@ import '../models/User.dart';
 import '../pages/LoginPage.dart';
 
 class ApiUserService {
+<<<<<<< HEAD
+  static const String baseUrl = "${UrlAPI.url}/users";
+  // static const String baseUrl = "http://192.168.1.134:8080/api/users";
+  static const String loginUrl = "${UrlAPI.url}/auth";
+=======
 
   static const String baseUrl = "http://192.168.1.134:8080/api/users";
   static const String loginUrl = "http://192.168.1.134:8080/api/auth";
 
+>>>>>>> c710d42b5e2b0f26b092e429d1430b57e5eb9c8f
   Future<bool> registerUser(User user) async {
     try {
       final response = await http.post(
@@ -29,9 +36,13 @@ class ApiUserService {
 
   Future<Map<String, dynamic>?> loginUser(String email, String password) async {
     final response = await http.post(
+<<<<<<< HEAD
+      Uri.parse("${UrlAPI.url}/auth/login"),
+=======
 
       Uri.parse("http://192.168.1.134:8080/api/auth/login"),
 
+>>>>>>> c710d42b5e2b0f26b092e429d1430b57e5eb9c8f
       headers: {"Content-Type": "application/json"},
       body: jsonEncode({"email": email, "password": password}),
     );
