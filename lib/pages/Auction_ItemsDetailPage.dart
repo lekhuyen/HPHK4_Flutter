@@ -19,11 +19,14 @@ class Auction_ItemsDetailPage extends StatefulWidget {
 
 class _Auction_ItemsDetailPageState extends State<Auction_ItemsDetailPage> {
   late ApiAuction_ItemsService apiService;
+  late ApiBiddingService biddingService = ApiBiddingService();
+
   List<AuctionItems> similarItems = [];
   bool isLoadingSimilarItems = true;
   late TextEditingController _bidController; // ✅ Ô nhập giá đấu
   bool isPlacingBid = false; // Trạng thái loading khi đặt giá
   AuctionItems? updatedItem; // 🔥 Biến giữ dữ liệu mới
+  double? price; // 🔥 Biến lưu trữ giá đã yêu cầu gửi
 
   @override
   void initState() {
@@ -31,14 +34,16 @@ class _Auction_ItemsDetailPageState extends State<Auction_ItemsDetailPage> {
     apiService = ApiAuction_ItemsService();
     _bidController = TextEditingController();
     fetchItemDetails(); // 🔥 Gọi API để lấy giá mới nhất
-
     ApiBiddingService biddingService = ApiBiddingService();
+    // 🔥 Lắng nghe WebSocket để cập nhật giá đấu giá ngay lập tức
     biddingService.onNewBidReceived = (double newPrice) {
-      print(
-          "🔄 WebSocket received new price: $newPrice"); // 🔥 Debug giá mới từ WebSocket
-      fetchItemDetails(); // 🔥 Thay vì chỉ cập nhật giá, gọi lại API
+      print("🔄 WebSocket received new price: $newPrice");
+      setState(() {
+        if (updatedItem != null) {
+          updatedItem!.currentPrice = newPrice; // ✅ Cập nhật giá trong UI
+        }
+      });
     };
-
     fetchSimilarItems();
     fetchUpcomingItems();
   }
@@ -52,55 +57,57 @@ class _Auction_ItemsDetailPageState extends State<Auction_ItemsDetailPage> {
     super.dispose();
   }
 
-  // 🔥 Hàm mới để cập nhật dữ liệu từ API
+  // 🔥 Gọi API để lấy giá hiện tại
   Future<void> fetchItemDetails() async {
     try {
       var newItem = await apiService.getItemById(widget.item.itemId!);
-
-      print(
-          "✅ API returned item details: ${newItem.toJson()}"); // 🔥 Debug toàn bộ dữ liệu API trả về
+      print("✅ API returned item details: ${newItem.toJson()}");
 
       setState(() {
         updatedItem = newItem; // ✅ Cập nhật dữ liệu mới từ API
       });
-
-      print(
-          "✅ Updated item price in UI: ${updatedItem?.currentPrice}"); // 🔥 Kiểm tra giá sau khi cập nhật
     } catch (e) {
       print("🚨 Lỗi khi tải sản phẩm mới: $e");
     }
   }
 
+  // 🔥 Đặt giá đấu giá mới
   Future<void> placeBid() async {
     double? bidAmount = double.tryParse(_bidController.text);
     if (bidAmount == null || bidAmount <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("🚨 Please enter a valid bid amount")),
+        const SnackBar(content: Text("🚨 Vui lòng nhập giá hợp lệ!")),
       );
       return;
     }
 
     setState(() => isPlacingBid = true);
 
-    bool success =
-        await ApiBiddingService().placeBid(widget.item.itemId!, bidAmount);
+    bool success = await biddingService.placeBid(widget.item.itemId!, bidAmount);
     setState(() => isPlacingBid = false);
 
     if (success) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-            content: Text(
-                "🎉 Bid placed successfully for \$${bidAmount.toStringAsFixed(2)}!")),
+        SnackBar(content: Text("🎉 Đã đặt giá thành công: \$${bidAmount.toStringAsFixed(2)}")),
       );
 
-      fetchItemDetails(); // 🔥 Gọi lại API để lấy giá mới nhất
+      // ✅ CẬP NHẬT UI NGAY LẬP TỨC
+      setState(() {
+        if (updatedItem != null) {
+          updatedItem!.currentPrice = bidAmount; // 🔥 Cập nhật UI ngay lập tức
+        }
+      });
+
+      fetchItemDetails(); // 🔥 Gọi API để lấy giá mới nhất
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content: Text("🚨 Failed to place bid. Please try again.")),
+        const SnackBar(content: Text("🚨 Đặt giá thất bại! Vui lòng thử lại.")),
       );
     }
   }
+
+
+
 
   /// Gọi API để lấy danh sách sản phẩm sắp tới
   Future<void> fetchUpcomingItems() async {
@@ -167,23 +174,7 @@ class _Auction_ItemsDetailPageState extends State<Auction_ItemsDetailPage> {
   @override
   Widget build(BuildContext context) {
     final item = updatedItem ?? widget.item; // 🔥 Sử dụng giá mới nếu có
-    @override
-    Widget build(BuildContext context) {
-      final item = updatedItem ?? widget.item;
-
-      print(
-          "🔥 Displaying price in UI: Current Price = ${item.currentPrice}, Starting Price = ${item.startingPrice}"); // 🔥 Debug giá hiển thị trên UI
-
-      return Scaffold(
-        appBar: AppBar(title: Text(item.itemName ?? 'Item Details')),
-        body: Column(
-          children: [
-            Text(
-                "Price: \$${item.currentPrice ?? item.startingPrice ?? 0}"), // ✅ Hiển thị current_price nếu có
-          ],
-        ),
-      );
-    }
+    print("🔥 Hiển thị giá: Current Price = ${item.currentPrice}, Starting Price = ${item.startingPrice}");
 
     String imageUrl =
         (widget.item.images != null && widget.item.images!.isNotEmpty)
