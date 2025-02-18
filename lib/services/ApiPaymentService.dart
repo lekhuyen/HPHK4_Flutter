@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:fe/services/UrlAPI.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -61,8 +62,7 @@ class ApiPaymentService {
       return null;
     }
 
-    final url =
-        Uri.parse("http://192.168.1.134:8080/api/v1/payment/bids/$userId");
+    final url = Uri.parse("${UrlAPI.url}/v1/payment/bids/$userId");
 
     try {
       final response = await http.get(
@@ -114,8 +114,7 @@ class ApiPaymentService {
       return [];
     }
 
-    final url =
-        Uri.parse("http://192.168.1.134/api/v1/payment/won-items/$userId");
+    final url = Uri.parse("${UrlAPI.url}/v1/payment/won-items/$userId");
 
     try {
       final response = await http.get(

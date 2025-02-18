@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:fe/services/UrlAPI.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/Auction_Items.dart';
@@ -50,7 +51,7 @@ class _MyBidsPageState extends State<MyBidsPage>
     if (userId == null) return;
 
     final response = await http.get(
-      Uri.parse("http://192.168.1.134:8080/api/v1/payment/bids/$userId"),
+      Uri.parse("${UrlAPI.url}/v1/payment/bids/$userId"),
       headers: {"Content-Type": "application/json"},
     );
 

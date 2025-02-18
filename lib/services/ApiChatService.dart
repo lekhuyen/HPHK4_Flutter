@@ -3,14 +3,15 @@ import 'dart:io';
 import 'package:fe/models/ChatMessageRequest.dart';
 import 'package:fe/models/ChatMessageResponse.dart';
 import 'package:fe/models/ChatRoomResponse.dart';
+import 'package:fe/services/UrlAPI.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiChatService {
-  static const String baseUrl = "http://192.168.1.134:8080/api";
-  static const String urlChat = "$baseUrl/chatroom";
+  // static const String baseUrl = "http://192.168.1.134:8080/api";
+  static const String urlChat = "${UrlAPI.url}/chatroom";
 
   Future<List<ChatRoomResponse>> getAllRoomByUser(String userId) async {
     final String url = "$urlChat/room/$userId";

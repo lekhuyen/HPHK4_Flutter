@@ -1,13 +1,14 @@
 import 'dart:io';
 
 import 'package:fe/models/Auction_Items.dart';
+import 'package:fe/services/UrlAPI.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiAuction_ItemsService {
-  static const String url = "http://192.168.1.134:8080/api";
-  static const String urlAuctionItems = "$url/auction";
+  // static const String url = "http://192.168.1.134:8080/api";
+  static const String urlAuctionItems = "${UrlAPI.url}/auction";
 
   Future<List<AuctionItems>> getAllAuctionItems() async {
     try {
@@ -168,8 +169,7 @@ class ApiAuction_ItemsService {
   }
 
   Future<int?> getCategoryIdByName(String categoryName) async {
-    final response =
-        await http.get(Uri.parse('http://192.168.1.134:8080/api/category'));
+    final response = await http.get(Uri.parse('${UrlAPI.url}/category'));
 
     if (response.statusCode == 200) {
       var jsonData = json.decode(response.body);
@@ -198,10 +198,10 @@ class ApiAuction_ItemsService {
       throw Exception("User ID không hợp lệ");
     }
 
-    final response = await http.get(
-        Uri.parse('http://192.168.1.134:8080/api/auction/creator/$userId'));
-    print("📢 API CALL: http://192.168.1.134:8080/api/auction/creator/$userId");
-    print("📢 API RESPONSE STATUS: ${response.statusCode}");
+    final response =
+        await http.get(Uri.parse('${UrlAPI.url}/auction/creator/$userId'));
+    // print("📢 API CALL: http://192.168.1.134:8080/api/auction/creator/$userId");
+    // print("📢 API RESPONSE STATUS: ${response.statusCode}");
     if (response.statusCode == 200) {
       try {
         final data = jsonDecode(response.body);
@@ -298,11 +298,11 @@ class ApiAuction_ItemsService {
       var response = await request.send();
       var responseBody = await response.stream.bytesToString();
 
-      print("📢 API Response Code: ${response.statusCode}");
-      print("📢 API Response Body: $responseBody");
+      // print("📢 API Response Code: ${response.statusCode}");
+      // print("📢 API Response Body: $responseBody");
 
       if (response.statusCode == 201 || response.statusCode == 200) {
-        print("✅ Auction item created successfully!");
+        // print("✅ Auction item created successfully!");
         return true;
       } else {
         print("❌ Failed to create auction item: $responseBody");
