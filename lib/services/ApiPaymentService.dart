@@ -7,7 +7,7 @@ import '../models/Auction_Items.dart';
 class ApiPaymentService {
   static const String _baseUrl =
 
-      "http://173.16.16.159:8080"; // ✅ Đổi thành URL backend của bạn
+      "http://192.168.1.30:8080"; // ✅ Đổi thành URL backend của bạn
 
 
   Future<String?> createPayment(
@@ -65,7 +65,7 @@ class ApiPaymentService {
 
     final url =
 
-        Uri.parse("http://173.16.16.135:8080/api/v1/payment/bids/$userId");
+        Uri.parse("http://192.168.1.30:8080/api/v1/payment/bids/$userId");
 
 
     try {
@@ -120,7 +120,7 @@ class ApiPaymentService {
 
     final url =
 
-        Uri.parse("http://173.16.16.135/api/v1/payment/won-items/$userId");
+        Uri.parse("http://192.168.1.30/api/v1/payment/won-items/$userId");
 
 
     try {
