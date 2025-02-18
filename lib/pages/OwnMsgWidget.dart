@@ -1,9 +1,16 @@
+import 'package:fe/models/ChatMessageResponse.dart';
 import 'package:flutter/material.dart';
 
 class OwnMsgWidget extends StatelessWidget {
   final String sender;
   final String msg;
-  const OwnMsgWidget({super.key, required this.msg, required this.sender});
+  // final List<ChatMessageResponse>? images;
+  const OwnMsgWidget({
+    super.key,
+    required this.msg,
+    required this.sender,
+    // required this.images
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +38,20 @@ class OwnMsgWidget extends StatelessWidget {
                       color: Colors.white,
                       fontSize: 14,
                       fontWeight: FontWeight.bold),
-                )
+                ),
+
+                // if (images != null && images!.isNotEmpty)
+                //   ...images!.map(
+                //     (image) => Padding(
+                //       padding: const EdgeInsets.symmetric(vertical: 5),
+                //       child: Image.network(
+                //         image,
+                //         width: 150,
+                //         height: 150,
+                //         fit: BoxFit.cover,
+                //       ),
+                //     ),
+                //   ),
               ],
             ),
           ),
