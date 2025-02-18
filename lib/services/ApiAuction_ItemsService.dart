@@ -237,14 +237,8 @@ class ApiAuction_ItemsService {
 
   Future<AuctionItems> getItemById(int itemId) async {
     final response = await http.get(Uri.parse("$urlAuctionItems/$itemId"));
-
-    print("📡 API Response: ${response.body}"); // 🔥 Debug phản hồi API
-
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
-
-      print("🔍 Raw Data from API: $data"); // 🔥 In toàn bộ dữ liệu API trả về
-
       double startingPrice = (data['result']['current_price'] != null &&
               data['result']['current_price'] > 0)
           ? data['result']['current_price'] // ✅ Lấy current_price nếu có
