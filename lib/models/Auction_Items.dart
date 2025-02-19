@@ -23,7 +23,13 @@ class AuctionItems {
   bool? paid;
   String? buyerName;
   int? categoryId;
-  String? categoryName;
+
+ 
+
+  String? categoryName; // For the category name
+
+  // Add category as a field of type Category
+
   Category? category;
   User? seller; // ✅ Sửa lỗi khi parse seller
 
@@ -49,7 +55,10 @@ class AuctionItems {
     this.images,
     this.categoryId,
     this.categoryName,
-    this.category,
+
+
+    this.category, // Include category in the constructor
+
     this.sellerId,
     this.seller,
   });
@@ -95,17 +104,23 @@ class AuctionItems {
     description = json["description"];
     startingPrice = json["starting_price"];
     currentPrice = json["current_price"];
-    ispaid = json["paid"] ?? false;
-    buyerName = json["buyer"] != null ? json["buyer"]["name"] : "Unknown Buyer";
+
+    ispaid = json["paid"] ?? false; // ✅ Nếu null thì mặc định false
+    buyerName = json["buyer"] != null
+        ? json["buyer"]["name"]
+        : "Unknown Buyer"; // ✅ Lấy tên buyer
+
 
     if (json["start_date"] is List && json["start_date"].length == 3) {
-      startDate = DateTime(json["start_date"][0], json["start_date"][1], json["start_date"][2]);
+      startDate = DateTime(
+          json["start_date"][0], json["start_date"][1], json["start_date"][2]);
     } else {
       startDate = null;
     }
 
     if (json["end_date"] is List && json["end_date"].length == 3) {
-      endDate = DateTime(json["end_date"][0], json["end_date"][1], json["end_date"][2]);
+      endDate = DateTime(
+          json["end_date"][0], json["end_date"][1], json["end_date"][2]);
     } else {
       endDate = null;
     }
@@ -131,8 +146,10 @@ class AuctionItems {
       category = Category.fromJson(json['category']);
     }
 
-    categoryId = json['category'] != null ? json['category']['category_id'] : null;
-    categoryName = json['category'] != null ? json['category']['category_name'] : null;
+    categoryId =
+        json['category'] != null ? json['category']['category_id'] : null;
+    categoryName =
+        json['category'] != null ? json['category']['category_name'] : null;
 
     sellerId = json["userId"]?.toString();
 

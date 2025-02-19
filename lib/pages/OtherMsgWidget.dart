@@ -3,7 +3,13 @@ import 'package:flutter/material.dart';
 class OtherMsgWidget extends StatelessWidget {
   final String sender;
   final String msg;
-  const OtherMsgWidget({super.key, required this.msg, required this.sender});
+  // final List<String>? images;
+  const OtherMsgWidget({
+    super.key,
+    required this.msg,
+    required this.sender,
+    // required this.images
+  });
 
   @override
   Widget build(BuildContext context) {

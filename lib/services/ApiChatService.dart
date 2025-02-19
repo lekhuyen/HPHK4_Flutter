@@ -1,14 +1,24 @@
+import 'dart:io';
+
 import 'package:fe/models/ChatMessageRequest.dart';
 import 'package:fe/models/ChatMessageResponse.dart';
 import 'package:fe/models/ChatRoomResponse.dart';
+import 'package:fe/services/UrlAPI.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiChatService {
-  static const String baseUrl = "http://192.168.1.30:8080/api";
+<<<<<<< HEAD
+  // static const String baseUrl = "http://192.168.1.134:8080/api";
+  static const String urlChat = "${UrlAPI.url}/chatroom";
+=======
+
+  static const String baseUrl = "http://192.168.1.134:8080/api";
+
   static const String urlChat = "$baseUrl/chatroom";
+>>>>>>> c710d42b5e2b0f26b092e429d1430b57e5eb9c8f
 
   Future<List<ChatRoomResponse>> getAllRoomByUser(String userId) async {
     final String url = "$urlChat/room/$userId";
@@ -64,7 +74,7 @@ class ApiChatService {
     }
   }
 
-  Future<ChatMessageResponse> sendMessage(ChatMessageRequest request) async {
+  Future<ChatMessageResponse> sendMessages(ChatMessageRequest request) async {
     const String url = "$urlChat/send-message";
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('token');
@@ -73,7 +83,7 @@ class ApiChatService {
       "roomId": request.roomId,
       "content": request.content,
       "sender": request.sender,
-      "imagess": request.imagesList,
+      "imagess": request.images,
     };
 
     final response = await http.post(
@@ -89,6 +99,38 @@ class ApiChatService {
       return ChatMessageResponse.fromJson(jsonDecode(response.body));
     } else {
       print("Lỗi ${response.statusCode}: ${response.body}");
+      throw Exception(
+          'Failed to send message. Status Code: ${response.statusCode}');
+    }
+  }
+
+  Future<ChatMessageResponse> sendMessage(ChatMessageRequest request) async {
+    const String url = "$urlChat/send-message";
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('token');
+
+    var requestMultipart = http.MultipartRequest("POST", Uri.parse(url))
+      ..headers["Authorization"] = "Bearer $token"
+      ..fields["roomId"] = request.roomId.toString()
+      ..fields["content"] = request.content ?? ""
+      ..fields["sender"] = request.sender ?? "";
+
+    // Kiểm tra nếu có ảnh thì thêm vào request
+    if (request.images != null && request.images!.isNotEmpty) {
+      for (var imagePath in request.images!) {
+        var multipartFile =
+            await http.MultipartFile.fromPath('images', imagePath);
+        requestMultipart.files.add(multipartFile);
+      }
+    }
+
+    var streamedResponse = await requestMultipart.send();
+    var response = await http.Response.fromStream(streamedResponse);
+
+    if (response.statusCode == 200) {
+      return ChatMessageResponse.fromJson(jsonDecode(response.body));
+    } else {
+      print("❌ Lỗi ${response.statusCode}: ${response.body}");
       throw Exception(
           'Failed to send message. Status Code: ${response.statusCode}');
     }

@@ -1,10 +1,24 @@
+
 import 'package:web_socket_channel/web_socket_channel.dart';
+
+import 'package:fe/services/UrlAPI.dart';
+import 'package:stomp_dart_client/stomp.dart';
+import 'package:stomp_dart_client/stomp_config.dart';
+import 'package:stomp_dart_client/stomp_frame.dart';
+
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiBiddingService {
+
   final String apiUrl = "http://192.168.1.30:8080/api/bidding";
   late WebSocketChannel channel;
+
+  final String apiUrl = "${UrlAPI.url}/bidding";
+
+
+  late StompClient stompClient;
+
   Function(double)? onNewBidReceived; // 🔥 Callback để cập nhật UI
 
   ApiBiddingService() {
@@ -12,6 +26,7 @@ class ApiBiddingService {
   }
   // Kết nối WebSocket
   void _connectWebSocket() {
+
     channel = WebSocketChannel.connect(
       Uri.parse('ws://192.168.1.30:8080/ws'), // Kiểm tra URL
     );
@@ -31,6 +46,9 @@ class ApiBiddingService {
               if (priceValue != null) {
                 double price = priceValue is double ? priceValue : double.tryParse(priceValue.toString()) ?? 0.0;
                 print("🔔 Giá mới nhận được: \$$price");
+
+
+    
 
                 if (onNewBidReceived != null) {
                   onNewBidReceived!(price);
@@ -58,7 +76,6 @@ class ApiBiddingService {
     );
   }
 
-
   // Cố gắng kết nối lại WebSocket nếu không thành công
   int reconnectAttempts = 0;
   static const int maxReconnectAttempts = 5;
@@ -79,7 +96,6 @@ class ApiBiddingService {
       _connectWebSocket();
     }
   }
-
 
   // Kiểm tra WebSocket kết nối trước khi gửi yêu cầu đặt giá
   Future<bool> placeBid(int productId, String? sellerId, double bidAmount) async {
