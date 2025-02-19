@@ -1,4 +1,5 @@
 import 'Category.dart';
+import 'User.dart';
 
 class AuctionItems {
   int? itemId;
@@ -18,20 +19,16 @@ class AuctionItems {
   DateTime? createdat;
   DateTime? updatedat;
   List<String>? images;
-  String? sellerId; // Ensure this field exists
-  bool? paid; // 🔥 Đảm bảo có trường paid
-  String? buyerName; // ✅ Thêm tên người mua
-
-  // Add categoryId and categoryName as separate fields
+  String? sellerId;
+  bool? paid;
+  String? buyerName;
   int? categoryId;
-  String? categoryName;  // For the category name
-
-  // Add category as a field of type Category
+  String? categoryName;
   Category? category;
+  User? seller; // ✅ Sửa lỗi khi parse seller
 
   AuctionItems({
-    this.buyerName, // ✅ Thêm vào constructor
-
+    this.buyerName,
     this.paid,
     this.itemId,
     this.itemName,
@@ -52,8 +49,9 @@ class AuctionItems {
     this.images,
     this.categoryId,
     this.categoryName,
-    this.category,  // Include category in the constructor
+    this.category,
     this.sellerId,
+    this.seller,
   });
 
   Map<String, dynamic> toJson() {
@@ -77,35 +75,35 @@ class AuctionItems {
     map["images"] = images;
     map["userId"] = sellerId;
     map["buyerName"] = buyerName;
-    // Include categoryId and categoryName in the JSON serialization
     map["category_id"] = categoryId;
     map["category_name"] = categoryName;
 
-    // Convert category object to JSON (if it's available)
     if (category != null) {
       map["category"] = category?.toJson();
     }
+
+    if (seller != null) {
+      map["seller"] = seller!.toJson();
+    }
+
     return map;
   }
 
-  // Update the fromJson constructor to handle category properly
   AuctionItems.fromJson(Map<String, dynamic> json) {
     itemId = json["item_id"];
     itemName = json["item_name"];
     description = json["description"];
     startingPrice = json["starting_price"];
     currentPrice = json["current_price"];
-    ispaid = json["paid"] ?? false; // ✅ Nếu null thì mặc định false
-    buyerName = json["buyer"] != null ? json["buyer"]["name"] : "Unknown Buyer"; // ✅ Lấy tên buyer
+    ispaid = json["paid"] ?? false;
+    buyerName = json["buyer"] != null ? json["buyer"]["name"] : "Unknown Buyer";
 
-    // ✅ Chuyển đổi start_date từ List<int> thành DateTime
     if (json["start_date"] is List && json["start_date"].length == 3) {
       startDate = DateTime(json["start_date"][0], json["start_date"][1], json["start_date"][2]);
     } else {
       startDate = null;
     }
 
-    // ✅ Chuyển đổi end_date từ List<int> thành DateTime
     if (json["end_date"] is List && json["end_date"].length == 3) {
       endDate = DateTime(json["end_date"][0], json["end_date"][1], json["end_date"][2]);
     } else {
@@ -119,7 +117,6 @@ class AuctionItems {
     width = json["width"];
     height = json["height"];
 
-    // ✅ Kiểm tra createdAt và updatedAt trước khi parse
     if (json["createdAt"] != null) {
       createdat = DateTime.tryParse(json["createdAt"].toString());
     }
@@ -129,6 +126,7 @@ class AuctionItems {
     }
 
     images = json["images"] != null ? List<String>.from(json["images"]) : [];
+
     if (json['category'] != null) {
       category = Category.fromJson(json['category']);
     }
@@ -136,7 +134,9 @@ class AuctionItems {
     categoryId = json['category'] != null ? json['category']['category_id'] : null;
     categoryName = json['category'] != null ? json['category']['category_name'] : null;
 
-    // ✅ Get sellerId from JSON
     sellerId = json["userId"]?.toString();
+
+    /// 🔥 Sửa lỗi: Nếu seller không phải null, parse thành User object
+    seller = json["user"] != null ? User.fromJson(json["user"]) : null;
   }
 }
