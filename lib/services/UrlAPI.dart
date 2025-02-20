@@ -1,4 +1,4 @@
 class UrlAPI {
-  static const String url = "http://192.168.1.134:8080/api";
-  static const String urlRealTime = "http://192.168.1.134:8080";
+  static const String url = "http://173.16.17.166:8080/api";
+  static const String urlRealTime = "http://173.16.17.166:8080";
 }

@@ -35,7 +35,7 @@ class _Auction_ItemsPageState extends State<Auction_ItemsPage> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => Auction_ItemsDetailPage(item: item), // Mở trang chi tiết đúng
+            builder: (context) =>   Auction_ItemsDetailPage(item: item), // Mở trang chi tiết đúng
           ),
         );
 

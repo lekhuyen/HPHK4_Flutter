@@ -34,7 +34,7 @@ class _Auction_ItemsDetailPageState extends State<Auction_ItemsDetailPage> {
   @override
   void initState() {
     super.initState();
-    sellerid = widget.item?.user!.id;
+    sellerid = widget.item?.user?.id; // ✅ An toàn: Kiểm tra null trước
 
     // print("user: ${widget.item.seller != null ? widget.item.seller!.id : "No Seller"}");
     apiService = ApiAuction_ItemsService();
@@ -188,7 +188,7 @@ class _Auction_ItemsDetailPageState extends State<Auction_ItemsDetailPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.item?.itemName ?? 'Item Details'),
+        title: Text(widget.item?.user?.name ?? 'Item Details'),
         //title: Text(widget.item?.user?.id ?? 'Item Details'),
 
         leading: IconButton(
@@ -275,7 +275,6 @@ class _Auction_ItemsDetailPageState extends State<Auction_ItemsDetailPage> {
             OutlinedButton(
               onPressed: () async {
                 final apiPaymentService = ApiPaymentService();
-
                 String orderId = DateTime.now()
                     .millisecondsSinceEpoch
                     .toString(); // ✅ Tạo orderId duy nhất
@@ -313,6 +312,9 @@ class _Auction_ItemsDetailPageState extends State<Auction_ItemsDetailPage> {
             /// Mô tả sản phẩm
             const Text("Description",
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+
+            const SizedBox(height: 8),
+            Text(widget.item?.description ?? 'No Description Available.'),
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
@@ -329,8 +331,6 @@ class _Auction_ItemsDetailPageState extends State<Auction_ItemsDetailPage> {
                     : const Text("ASK A QUESTION"),
               ),
             ),
-            const SizedBox(height: 8),
-            Text(widget.item?.description ?? 'No Description Available.'),
             const Divider(),
             const Text('Upcomming Items Available Now',
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),

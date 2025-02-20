@@ -32,8 +32,6 @@ class _CreateAuctionItemsPageState extends State {
   String? currentUserId;
   double? _currentPrice;
   bool _isPickingImage = false; // Add this flag
-
-
   @override
   void initState() {
     super.initState();

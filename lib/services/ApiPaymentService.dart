@@ -3,11 +3,12 @@ import 'package:fe/services/UrlAPI.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../models/Auction.dart';
 import '../models/Auction_Items.dart';
 
 class ApiPaymentService {
   static const String _baseUrl =
-      "http://192.168.1.134:8080"; // ✅ Đổi thành URL backend của bạn
+      "http://173.16.17.166:8080"; // ✅ Đổi thành URL backend của bạn
 
   Future<String?> createPayment(
       String productId, double amount, String orderId) async {
@@ -52,7 +53,7 @@ class ApiPaymentService {
     }
   }
 
-  Future<Map<String, List<AuctionItems>>?> getUserBids() async {
+  Future<Map<String, List<Auction>>?> getUserBids() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('token');
     String? userId = prefs.getString('userId');
@@ -61,9 +62,7 @@ class ApiPaymentService {
       print("🚨 Không tìm thấy token hoặc userId!");
       return null;
     }
-
     final url = Uri.parse("${UrlAPI.url}/v1/payment/bids/$userId");
-
     try {
       final response = await http.get(
         url,
@@ -72,10 +71,8 @@ class ApiPaymentService {
           "Content-Type": "application/json"
         },
       );
-
       print("📢 API BID STATUS: ${response.statusCode}");
       print("📢 API BID BODY: ${response.body}");
-
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
 
@@ -85,12 +82,12 @@ class ApiPaymentService {
           return null;
         }
 
-        List<AuctionItems> paidItems = (data["paid"] as List)
-            .map((e) => AuctionItems.fromJson(e))
+        List<Auction> paidItems = (data["paid"] as List)
+            .map((e) => Auction.fromJson(e))
             .toList();
 
-        List<AuctionItems> unpaidItems = (data["unpaid"] as List)
-            .map((e) => AuctionItems.fromJson(e))
+        List<Auction> unpaidItems = (data["unpaid"] as List)
+            .map((e) => Auction.fromJson(e))
             .toList();
 
         return {"paid": paidItems, "unpaid": unpaidItems};
@@ -104,7 +101,10 @@ class ApiPaymentService {
     }
   }
 
-  Future<List<AuctionItems>> getWonItemsByUser() async {
+
+
+
+Future<List<Auction>> getWonItemsByUser() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? userId = prefs.getString('userId');
     String? token = prefs.getString('token');
@@ -135,11 +135,11 @@ class ApiPaymentService {
           List<dynamic> rawItems = data["data"];
 
           // 🔥 Bỏ dữ liệu buyer.auctionItems nếu tồn tại
-          List<AuctionItems> wonItems = rawItems.map((e) {
+          List<Auction> wonItems = rawItems.map((e) {
             if (e.containsKey("buyer") && e["buyer"] is Map) {
               e["buyer"].remove("auctionItems"); // ✅ Xóa dữ liệu lỗi
             }
-            return AuctionItems.fromJson(e);
+            return Auction.fromJson(e);
           }).toList();
 
           return wonItems;
