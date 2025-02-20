@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:fe/services/UrlAPI.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../models/Auction_Items.dart';
+import '../models/Auction.dart';
 import '../services/ApiPaymentService.dart';
 import 'LoginPage.dart';
 import 'package:http/http.dart' as http;
@@ -14,14 +14,14 @@ class MyBidsPage extends StatefulWidget {
   State<MyBidsPage> createState() => _MyBidsPageState();
 }
 
-class _MyBidsPageState extends State<MyBidsPage>
-    with SingleTickerProviderStateMixin {
+class _MyBidsPageState extends State<MyBidsPage> with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final ApiPaymentService _apiPaymentService = ApiPaymentService();
-  List<AuctionItems> paidItems = [];
-  List<AuctionItems> unpaidItems = [];
+  List<Auction> paidItems = [];
+  List<Auction> unpaidItems = [];
   bool isLoading = true;
   String? userId;
+  String selectedSort = "price"; // 🔥 Mặc định sắp xếp theo giá
 
   @override
   void initState() {
@@ -62,12 +62,8 @@ class _MyBidsPageState extends State<MyBidsPage>
       final data = jsonDecode(response.body);
 
       setState(() {
-        paidItems = (data["paid"] as List)
-            .map((e) => AuctionItems.fromJson(e))
-            .toList();
-        unpaidItems = (data["unpaid"] as List)
-            .map((e) => AuctionItems.fromJson(e))
-            .toList();
+        paidItems = (data["paid"] as List).map((e) => Auction.fromJson(e)).toList();
+        unpaidItems = (data["unpaid"] as List).map((e) => Auction.fromJson(e)).toList();
         isLoading = false;
       });
 
@@ -79,22 +75,44 @@ class _MyBidsPageState extends State<MyBidsPage>
         isLoading = false;
       });
     }
+    _sortItems(); // 🔥 Gọi hàm sắp xếp ngay sau khi lấy dữ liệu
+  }
+
+  /// 🔥 Hàm sắp xếp danh sách theo tiêu chí đã chọn
+  void _sortItems() {
+    setState(() {
+      Comparator<Auction> comparator;
+      switch (selectedSort) {
+        case "price":
+          comparator = (a, b) => (b.startingPrice ?? 0).compareTo(a.startingPrice ?? 0);
+          break;
+        case "date":
+          comparator = (a, b) => (b.startDate ?? DateTime(2000)).compareTo(a.startDate ?? DateTime(2000));
+          break;
+        case "name":
+          comparator = (a, b) => (a.itemName ?? "").compareTo(b.itemName ?? "");
+          break;
+        default:
+          return;
+      }
+      paidItems.sort(comparator);
+      unpaidItems.sort(comparator);
+    });
+  }
+
+  /// ✅ Tính tổng số tiền đã đấu giá
+  double getTotalAmount(List<Auction> items) {
+    return items.fold(0.0, (sum, item) => sum + (item.startingPrice ?? 0));
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('My Bids',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+        title: const Text('My Bids'),
         centerTitle: true,
         bottom: TabBar(
           controller: _tabController,
-          indicatorColor: Colors.blue,
-          labelColor: Colors.black,
-          unselectedLabelColor: Colors.grey,
-          labelStyle:
-              const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           tabs: const [
             Tab(text: 'Paid'),
             Tab(text: 'Unpaid'),
@@ -104,99 +122,115 @@ class _MyBidsPageState extends State<MyBidsPage>
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : Column(
+        children: [
+          // 🔥 Dropdown dưới TabBar
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                if (userId == null)
-                  _buildLoginPrompt(), // ✅ Hiển thị đăng nhập trên cùng
-                Expanded(
-                  child: TabBarView(
-                    controller: _tabController,
-                    children: [
-                      _buildBidList(paidItems, "No paid items"),
-                      _buildBidList(unpaidItems, "No unpaid items"),
-                    ],
-                  ),
+                const Text("Sort by: "),
+                DropdownButton<String>(
+                  value: selectedSort,
+                  onChanged: (String? newValue) {
+                    setState(() {
+                      selectedSort = newValue!;
+                      _sortItems();
+                    });
+                  },
+                  items: [
+                    DropdownMenuItem(value: "price", child: Text("Price")),
+                    DropdownMenuItem(value: "date", child: Text("Date")),
+                    DropdownMenuItem(value: "name", child: Text("Name")),
+                  ],
                 ),
               ],
             ),
-    );
-  }
-
-  /// ✅ Widget thông báo yêu cầu đăng nhập
-  Widget _buildLoginPrompt() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      color: Colors.grey[200],
-      child: Column(
-        children: [
-          const Text(
-            "Log in to save items, follow searches, place bids, and register for auctions.",
-            textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 16, color: Colors.black54),
           ),
-          const SizedBox(height: 10),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const LoginPage()),
-              );
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.teal,
-              padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
+
+          // ✅ THÊM PHẦN THỐNG KÊ
+          // ✅ THÊM PHẦN THỐNG KÊ
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Card(
+              elevation: 3,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded( // ✅ Ngăn lỗi RenderFlex bằng Expanded
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text("Tổng giá trị đã được thánh toán:",
+                              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                          Text("\$${getTotalAmount([...paidItems, ...unpaidItems]).toStringAsFixed(2)}",
+                              style: const TextStyle(fontSize: 20, color: Colors.green, fontWeight: FontWeight.bold)),
+                        ],
+                      ),
+                    ),
+                    Expanded( // ✅ Ngăn lỗi RenderFlex bằng Expanded
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text("Số lượng đa bán đấu giá",
+                              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                          Text("${paidItems.length + unpaidItems.length} sản phẩm",
+                              style: const TextStyle(fontSize: 20, color: Colors.blue, fontWeight: FontWeight.bold)),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
-            child: const Text("LOG IN",
-                style: TextStyle(fontSize: 16, color: Colors.white)),
+          ),
+
+          Expanded(
+            child: TabBarView(
+              controller: _tabController,
+              children: [
+                _buildBidList(paidItems, "No paid items"),
+                _buildBidList(unpaidItems, "No unpaid items"),
+              ],
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildBidList(List<AuctionItems> items, String emptyText) {
+  Widget _buildBidList(List<Auction> items, String emptyText) {
     return items.isEmpty
         ? Column(
-            children: [
-              const SizedBox(height: 16),
-              Text(emptyText,
-                  style: const TextStyle(fontSize: 16, color: Colors.black54)),
-            ],
-          )
+      children: [
+        const SizedBox(height: 16),
+        Text(emptyText, style: const TextStyle(fontSize: 16, color: Colors.black54)),
+      ],
+    )
         : ListView.builder(
-            padding: const EdgeInsets.all(16.0),
-            itemCount: items.length,
-            itemBuilder: (context, index) {
-              AuctionItems item = items[index];
-              return Card(
-                elevation: 2,
-                margin: const EdgeInsets.symmetric(vertical: 8),
-                child: ListTile(
-                  leading: item.images != null && item.images!.isNotEmpty
-                      ? Image.network(item.images!.first,
-                          width: 50, height: 50, fit: BoxFit.cover)
-                      : const Icon(Icons.image, size: 50),
-                  title: Text(item.itemName ?? "No Name"),
-                  subtitle: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text("Price: \$${item.startingPrice ?? 0}"),
-                      if (item.ispaid ?? false)
-                        Text("Buyer: ${item.buyerName}",
-                            style: const TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight
-                                    .bold)), // ✅ Hiển thị tên người thanh toán
-                    ],
-                  ),
-                  trailing: Text(
-                    (item.ispaid ?? false) ? "Paid ✅" : "Unpaid ❌",
-                    style: TextStyle(
-                        color:
-                            (item.ispaid ?? false) ? Colors.green : Colors.red),
-                  ),
-                ),
-              );
-            },
-          );
+      padding: const EdgeInsets.all(16.0),
+      itemCount: items.length,
+      itemBuilder: (context, index) {
+        Auction item = items[index];
+        return Card(
+          elevation: 2,
+          margin: const EdgeInsets.symmetric(vertical: 8),
+          child: ListTile(
+            leading: item.imagesList != null && item.imagesList!.isNotEmpty
+                ? Image.network(item.imagesList!.first, width: 50, height: 50, fit: BoxFit.cover)
+                : const Icon(Icons.image, size: 50),
+            title: Text(item.itemName ?? "No Name"),
+            subtitle: Text("Price: \$${item.startingPrice ?? 0}"),
+            trailing: Text(
+              (item.ispaid ?? false) ? "Paid ✅" : "Unpaid ❌",
+              style: TextStyle(color: (item.ispaid ?? false) ? Colors.green : Colors.red),
+            ),
+          ),
+        );
+      },
+    );
   }
 }

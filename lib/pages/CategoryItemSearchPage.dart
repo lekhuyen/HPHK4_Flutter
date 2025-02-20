@@ -216,12 +216,12 @@ class _CategoryItemSearchPageState extends State<CategoryItemSearchPage> {
                   title: Text(item.itemName ?? 'No Name'),
                   subtitle: Text(item.description ?? ''),
                   onTap: () {
-                    // Navigator.push(
-                    //   context,
-                    //   MaterialPageRoute(
-                    //     builder: (context) => Homepage(initialIndex: 0, selectedItem: item), // 🔥 Mở trong HomePage
-                    //   ),
-                    // );
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => Homepage(initialIndex: 0, selectedItem: item), // 🔥 Mở trong HomePage
+                      ),
+                    );
                   },
                 );
               },

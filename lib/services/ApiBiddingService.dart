@@ -11,7 +11,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiBiddingService {
 
-  final String apiUrl = "http://192.168.1.30:8080/api/bidding";
   late WebSocketChannel channel;
 
   final String apiUrl = "${UrlAPI.url}/bidding";

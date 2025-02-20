@@ -1,10 +1,12 @@
 import 'dart:convert';
 
+import 'package:fe/pages/ForgotPasswordPage.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/User.dart';
 import '../services/ApiUserService.dart';
 import 'CreateAuctionItemsPage.dart';
+import 'DeviceSettingsPage.dart';
 import 'MyAccountPage.dart';
 import 'MyAuctionPage.dart';
 import 'MyBidsPage.dart';
@@ -112,8 +114,11 @@ class _LoginPageState extends State<LoginPage> {
     final TextEditingController usernameController = TextEditingController();
     final TextEditingController emailController = TextEditingController();
     final TextEditingController passwordController = TextEditingController();
-    final TextEditingController confirmPasswordController =
-        TextEditingController();
+    final TextEditingController confirmPasswordController = TextEditingController();
+    final TextEditingController phoneController = TextEditingController();
+    final TextEditingController addressController = TextEditingController();
+
+    DateTime? selectedDOB;
     bool isChecked = false;
 
     showModalBottomSheet(
@@ -129,120 +134,186 @@ class _LoginPageState extends State<LoginPage> {
               heightFactor: 0.85,
               child: Padding(
                 padding: const EdgeInsets.all(20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Tiêu đề và nút đóng
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text("Sign Up",
-                            style: TextStyle(
-                                fontSize: 20, fontWeight: FontWeight.bold)),
-                        IconButton(
-                            icon: const Icon(Icons.close),
-                            onPressed: () => Navigator.pop(context)),
-                      ],
-                    ),
-                    const SizedBox(height: 15),
-
-                    // Username
-                    TextField(
-                        controller: usernameController,
-                        decoration: _inputDecoration("Username")),
-                    const SizedBox(height: 15),
-                    // Email
-                    TextField(
-                        controller: emailController,
-                        decoration: _inputDecoration("Email")),
-                    const SizedBox(height: 15),
-                    // Password
-                    TextField(
-                        controller: passwordController,
-                        obscureText: true,
-                        decoration: _inputDecoration("Password")),
-                    const SizedBox(height: 15),
-                    // Confirm Password
-                    TextField(
-                        controller: confirmPasswordController,
-                        obscureText: true,
-                        decoration: _inputDecoration("Confirm Password")),
-                    const SizedBox(height: 15),
-
-                    // Checkbox Terms & Conditions
-                    Row(
-                      children: [
-                        Checkbox(
-                          value: isChecked,
-                          onChanged: (bool? value) {
-                            setState(() {
-                              isChecked = value ?? false;
-                            });
-                          },
-                        ),
-                        const Center(
-                          child: Text("I agree to the Terms & Conditions",
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Tiêu đề và nút đóng
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text("Sign Up",
                               style: TextStyle(
-                                  fontSize: 14, color: Colors.black54)),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 15),
-                    Center(
-                      child: GestureDetector(
-                        onTap: () {
-                          Navigator.pop(context); // Đóng Sign Up
-                          _showLoginDialog(context); // Mở Login
+                                  fontSize: 20, fontWeight: FontWeight.bold)),
+                          IconButton(
+                              icon: const Icon(Icons.close),
+                              onPressed: () => Navigator.pop(context)),
+                        ],
+                      ),
+                      const SizedBox(height: 15),
+
+                      // Username
+                      TextField(
+                          controller: usernameController,
+                          decoration: _inputDecoration("Username")),
+                      const SizedBox(height: 15),
+
+                      // Email
+                      TextField(
+                          controller: emailController,
+                          decoration: _inputDecoration("Email")),
+                      const SizedBox(height: 15),
+
+                      // Phone Number
+                      TextField(
+                          controller: phoneController,
+                          keyboardType: TextInputType.phone,
+                          decoration: _inputDecoration("Phone Number")),
+                      const SizedBox(height: 15),
+
+                      // Address
+                      TextField(
+                          controller: addressController,
+                          decoration: _inputDecoration("Address")),
+                      const SizedBox(height: 15),
+
+                      // DOB (Ngày Sinh) với Date Picker
+                      GestureDetector(
+                        onTap: () async {
+                          DateTime? pickedDate = await showDatePicker(
+                            context: context,
+                            initialDate: DateTime(2000),
+                            firstDate: DateTime(1900),
+                            lastDate: DateTime.now(),
+                          );
+                          if (pickedDate != null) {
+                            setState(() {
+                              selectedDOB = pickedDate;
+                            });
+                          }
                         },
-                        child: RichText(
-                          text: const TextSpan(
-                            text: "Already have an account? ",
-                            style: TextStyle(color: Colors.black, fontSize: 16),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.grey),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              TextSpan(
-                                text: "Log In",
-                                style: TextStyle(
-                                    color: Colors.teal,
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold),
+                              Text(
+                                selectedDOB == null
+                                    ? "Select Date of Birth"
+                                    : "${selectedDOB!.day}/${selectedDOB!.month}/${selectedDOB!.year}",
+                                style: const TextStyle(fontSize: 16),
                               ),
+                              const Icon(Icons.calendar_today, color: Colors.grey),
                             ],
                           ),
                         ),
                       ),
-                    ),
+                      const SizedBox(height: 15),
 
-                    // Nút SIGN UP
-                    ElevatedButton(
-                      onPressed: isChecked
-                          ? () async {
-                              if (passwordController.text !=
-                                  confirmPasswordController.text) {
-                                _showMessage(
-                                    context, "Passwords do not match!");
-                                return;
-                              }
-                              User newUser = User(
-                                name: usernameController.text,
-                                email: emailController.text,
-                                password: passwordController.text,
-                              );
+                      // Password
+                      TextField(
+                          controller: passwordController,
+                          obscureText: true,
+                          decoration: _inputDecoration("Password")),
+                      const SizedBox(height: 15),
 
-                              bool isSuccess =
-                                  await _apiUserService.registerUser(newUser);
-                              if (isSuccess) {
-                                _showMessage(context, "Sign Up Successful!");
-                                Navigator.pop(context);
-                              } else {
-                                _showMessage(context, "Sign Up Failed!");
-                              }
-                            }
-                          : null,
-                      style: _buttonStyle(),
-                      child: const Text("SIGN UP",
-                          style: TextStyle(fontSize: 18, color: Colors.white)),
-                    ),
-                  ],
+                      // Confirm Password
+                      TextField(
+                          controller: confirmPasswordController,
+                          obscureText: true,
+                          decoration: _inputDecoration("Confirm Password")),
+                      const SizedBox(height: 15),
+
+                      // Checkbox Terms & Conditions
+                      Row(
+                        children: [
+                          Checkbox(
+                            value: isChecked,
+                            onChanged: (bool? value) {
+                              setState(() {
+                                isChecked = value ?? false;
+                              });
+                            },
+                          ),
+                          const Expanded(
+                            child: Text("I agree to the Terms & Conditions",
+                                style: TextStyle(
+                                    fontSize: 14, color: Colors.black54)),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 15),
+
+                      // Chuyển sang đăng nhập nếu đã có tài khoản
+                      Center(
+                        child: GestureDetector(
+                          onTap: () {
+                            Navigator.pop(context); // Đóng Sign Up
+                            _showLoginDialog(context); // Mở Login
+                          },
+                          child: RichText(
+                            text: const TextSpan(
+                              text: "Already have an account? ",
+                              style: TextStyle(color: Colors.black, fontSize: 16),
+                              children: [
+                                TextSpan(
+                                  text: "Log In",
+                                  style: TextStyle(
+                                      color: Colors.teal,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 15),
+
+                      // Nút SIGN UP
+                      ElevatedButton(
+                        onPressed: isChecked
+                            ? () async {
+                          if (passwordController.text !=
+                              confirmPasswordController.text) {
+                            _showMessage(
+                                context, "Passwords do not match!");
+                            return;
+                          }
+                          if (selectedDOB == null) {
+                            _showMessage(context, "Please select your Date of Birth!");
+                            return;
+                          }
+
+                          User newUser = User(
+                            name: usernameController.text,
+                            email: emailController.text,
+                            password: passwordController.text,
+                            phone: phoneController.text,
+                            address: addressController.text,
+                            dob: selectedDOB,
+                          );
+
+                          bool isSuccess =
+                          await _apiUserService.registerUser(newUser);
+                          if (isSuccess) {
+                            _showMessage(context, "Sign Up Successful!");
+                            Navigator.pop(context);
+                          } else {
+                            _showMessage(context, "Sign Up Failed!");
+                          }
+                        }
+                            : null,
+                        style: _buttonStyle(),
+                        child: const Text("SIGN UP",
+                            style: TextStyle(fontSize: 18, color: Colors.white)),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             );
@@ -251,11 +322,9 @@ class _LoginPageState extends State<LoginPage> {
       },
     );
   }
-
   void _showLoginDialog(BuildContext context) {
     final TextEditingController emailController = TextEditingController();
     final TextEditingController passwordController = TextEditingController();
-
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -352,13 +421,24 @@ class _LoginPageState extends State<LoginPage> {
                 Center(
                   child: Column(
                     children: [
-                      TextButton(
-                        onPressed: () {},
-                        child: const Text(
-                          "Forgot Password?",
-                          style: TextStyle(color: Colors.blue, fontSize: 16),
+                      if (_username == null)
+                        GestureDetector(
+                          onTap: () {
+                            // Navigate to the ForgotPasswordPage when the text is tapped
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => const ForgotPasswordPage()),
+                            );
+                          },
+                          child: const Text(
+                            "Forgot password.",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.blue, // Set the text color to blue
+                            ),
+                          ),
                         ),
-                      ),
                       TextButton(
                         onPressed: () {
                           Navigator.pop(context); // Đóng popup đăng nhập
@@ -502,7 +582,10 @@ class _LoginPageState extends State<LoginPage> {
                 }),
                 _buildListTile("Notifications", () {}),
                 _buildListTile("Message", () {}),
-                _buildListTile("Device Settings", () {}),
+                _buildListTile("Device Settings", () {
+
+                }),
+
                 const Divider(),
               ],
 

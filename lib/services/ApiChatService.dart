@@ -10,15 +10,9 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiChatService {
-<<<<<<< HEAD
-  // static const String baseUrl = "http://192.168.1.134:8080/api";
+
   static const String urlChat = "${UrlAPI.url}/chatroom";
-=======
 
-  static const String baseUrl = "http://192.168.1.134:8080/api";
-
-  static const String urlChat = "$baseUrl/chatroom";
->>>>>>> c710d42b5e2b0f26b092e429d1430b57e5eb9c8f
 
   Future<List<ChatRoomResponse>> getAllRoomByUser(String userId) async {
     final String url = "$urlChat/room/$userId";

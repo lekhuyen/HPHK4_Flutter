@@ -81,19 +81,19 @@ class ApiAuction_ItemsService {
 
 
 
-  Future<List<AuctionItems>> getAllAuctionItemsn() async {
+  Future<List<Auction>> getAllAuctionItemsn() async {
     try {
       final response = await http.get(Uri.parse(urlAuctionItems));
 
       if (response.statusCode == 200) {
         var data = json.decode(response.body);
-        List<AuctionItems> list = [];
+        List<Auction> list = [];
 
         print("Decoded auction items data: $data");
 
         for (var item in data['result']['data']) {
           // Adjust the data path based on your actual JSON structure
-          AuctionItems auctionItems = AuctionItems.fromJson(item);
+          Auction auctionItems = Auction.fromJson(item);
           list.add(auctionItems);
         }
         print("Fetched ${list.length} auction items.");
@@ -108,7 +108,7 @@ class ApiAuction_ItemsService {
     }
   }
 
-  Future<AuctionItems?> getAuctionItemById(int id) async {
+  Future<Auction?> getAuctionItemById(int id) async {
     try {
       print("Sending GET request to: $urlAuctionItems/$id");
 
@@ -126,7 +126,7 @@ class ApiAuction_ItemsService {
         if (jsonData != null) {
           // Parse the data into AuctionItems object
           try {
-            return AuctionItems.fromJson(jsonData);
+            return Auction.fromJson(jsonData);
           } catch (e) {
             print("Error parsing auction item: $e");
             return null; // Return null if parsing fails
@@ -171,55 +171,50 @@ class ApiAuction_ItemsService {
   }
 
   Future<List<Auction>> getItemsByCategory(String categoryId) async {
-    try {
-      final response = await http
-          .get(Uri.parse('$urlAuctionItems/category/$categoryId?size=100'));
+    final response = await http.get(Uri.parse("$urlAuctionItems/category/$categoryId?size=100"));
 
-      if (response.statusCode == 200) {
-        var jsonData = json.decode(response.body);
-        List<Auction> list = [];
+    if (response.statusCode == 200) {
+      final utf8Decoded = utf8.decode(response.bodyBytes);
+      final data = jsonDecode(utf8Decoded);
+      print("📌 API Response (category items): $data"); // ✅ Debug API response
 
-        if (jsonData['result'] != null) {
-          for (var item in jsonData['result']['data']) {
-            Auction auctionItem = Auction.fromJson(item);
-            list.add(auctionItem);
-          }
-        }
-        print("✅ Fetched ${list.length} items from category $categoryId");
-
-        return list;
-      } else {
-        throw Exception('Failed to load items by category');
+      if (data['result'] == null) {
+        return [];
       }
-    } catch (e) {
-      print("🚨 Error fetching items by category: $e");
-      throw Exception('Error fetching items by category: $e');
+
+      return (data['result'] as List).map((item) => Auction.fromJson(item)).toList();
+    } else {
+      throw Exception("Failed to load items by category");
     }
   }
+
+
 
   Future<int?> getCategoryIdByName(String categoryName) async {
     final response = await http.get(Uri.parse('${UrlAPI.url}/category'));
 
     if (response.statusCode == 200) {
       var jsonData = json.decode(response.body);
+      print("📌 Danh sách danh mục từ API: $jsonData"); // ✅ Debug danh sách category
 
       if (jsonData['result'] != null && jsonData['result']['data'] != null) {
         List<dynamic> categories = jsonData['result']['data'];
 
         for (var category in categories) {
-          String? apiCategoryName =
-              category['category_name']; // Đọc đúng key từ API
+          String? apiCategoryName = category['category_name'];
 
-          if (apiCategoryName != null &&
-              apiCategoryName.trim() == categoryName.trim()) {
-            return category['category_id']; // Trả về ID nếu tìm thấy
+          if (apiCategoryName != null && apiCategoryName.trim() == categoryName.trim()) {
+            print("✅ Tìm thấy category ID: ${category['category_id']} cho danh mục $categoryName");
+            return category['category_id'];
           }
         }
       }
     }
+
     print("⚠️ Không tìm thấy category ID cho $categoryName");
     return null;
   }
+
 
   Future<List<Auction>> fetchAuctionsByCreator(String userId) async {
     if (userId.isEmpty) {
@@ -229,8 +224,7 @@ class ApiAuction_ItemsService {
 
     final response =
         await http.get(Uri.parse('${UrlAPI.url}/auction/creator/$userId'));
-    // print("📢 API CALL: http://192.168.1.134:8080/api/auction/creator/$userId");
-    // print("📢 API RESPONSE STATUS: ${response.statusCode}");
+
     if (response.statusCode == 200) {
       try {
         final data = jsonDecode(response.body);
@@ -264,28 +258,30 @@ class ApiAuction_ItemsService {
     }
   }
 
-  Future<Auction> getItemById(int? itemId) async {
+
+  Future<Auction?> getItemById(int? itemId) async {
     final response = await http.get(Uri.parse("$urlAuctionItems/$itemId"));
 
     if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
+      final utf8Decoded = utf8.decode(response.bodyBytes); // ✅ Fix UTF-8 encoding
+      final data = jsonDecode(utf8Decoded);
+
+      print("📌 API Response từ Flutter: $data"); // ✅ Debug toàn bộ JSON
 
       if (data['result'] == null) {
         throw Exception("Invalid response format");
       }
 
-      // ✅ Lấy giá từ Bidding, không phải từ Auction
-      double latestPrice = data['result']['bidding']?['price'] ?? 0.0;
+      print("📌 Người bán từ API trong Flutter: ${data['result']['user']}");
 
-      print("✅ API trả về giá mới nhất từ Bidding: $latestPrice");
+      Auction auction = Auction.fromJson(data['result']);
+      print("📌 Auction sau khi parse JSON: ${auction.toJson()}"); // ✅ Kiểm tra dữ liệu sau khi parse
 
-      return Auction.fromJson({...data['result'], 'startingPrice': latestPrice});
+      return auction;
     } else {
       throw Exception("Failed to load auction item");
     }
   }
-
-
 
   Future<bool> createAuctionItem(
       String itemName, Map<String, dynamic> itemData, File imageFile) async {
@@ -325,8 +321,6 @@ class ApiAuction_ItemsService {
       var response = await request.send();
       var responseBody = await response.stream.bytesToString();
 
-      // print("📢 API Response Code: ${response.statusCode}");
-      // print("📢 API Response Body: $responseBody");
 
       if (response.statusCode == 201 || response.statusCode == 200) {
         // print("✅ Auction item created successfully!");
@@ -341,4 +335,35 @@ class ApiAuction_ItemsService {
       return false;
     }
   }
+
+
+  Future<Auction?> getAuctionItemByIdV2(int itemId) async {
+    final response = await http.get(Uri.parse("$urlAuctionItems/$itemId"));
+
+    if (response.statusCode == 200) {
+      final utf8Decoded = utf8.decode(response.bodyBytes);
+      final data = jsonDecode(utf8Decoded);
+
+      print("📌 API Response từ Flutter: $data");
+
+      if (data['result'] == null) {
+        throw Exception("Invalid response format");
+      }
+
+      print("📌 Người bán từ API: ${data['result']['user']}");
+
+      Auction auction = Auction.fromJson(data['result']);
+      print("📌 Auction sau khi parse JSON: ${auction.toJson()}");
+
+      return auction;
+    } else {
+      throw Exception("Failed to load auction item");
+    }
+  }
+
+
+
+
+
+
 }
